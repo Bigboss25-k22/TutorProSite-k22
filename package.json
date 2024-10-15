@@ -1,0 +1,29 @@
+{
+  "name": "tutorprosite",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bigboss25-k22/TutorProSite-k22.git"
+  },
+  "keywords": [
+    "tutorWeb"
+  ],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bigboss25-k22/TutorProSite-k22/issues"
+  },
+  "homepage": "https://github.com/Bigboss25-k22/TutorProSite-k22#readme",
+  "description": "",
+  "dependencies": {
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.7"
+  }
+}
