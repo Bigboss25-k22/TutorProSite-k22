@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const CourseController = require('../app/controllers/CourseController');
+const UserController = require('../app/controllers/UserController');
 
-
-router.get('/', CourseController.show);
+router.get('/', UserController.show);
 
 module.exports = router;
