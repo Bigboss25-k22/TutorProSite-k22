@@ -1,22 +1,30 @@
 const User = require('../models/user');
-const { mongooseToObject } = require('../../util/mongoose');
+const { mongooseToObject, multipleMongooseToObject } = require('../../util/mongoose');
 
 class UserController {
     // [GET] /users/student
     async showStudents(req, res, next) {
+
         try {
-            const users = await User.find({ role: 'student' }); 
-            res.json(users.map(user => mongooseToObject(user))); 
+            const users = await User.find({role: 'student'});
+            res.render('User/users', {
+                title: 'List student of users',
+                users: multipleMongooseToObject(users)
+            });
         } catch (error) {
-            next(error); 
+            next(error);
         }
     }
+    
 
     // [GET] /users/tuto
     async showTutos(req, res, next) {
         try {
             const users = await User.find({ role: 'tuto' }); 
-            res.json(users.map(user => mongooseToObject(user))); 
+            res.render('User/users', {
+                title: 'List tuto of users',
+                users: multipleMongooseToObject(users)
+            });
         } catch (error) {
             next(error); 
         }
@@ -26,10 +34,18 @@ class UserController {
     async show(req, res, next) {
         try {
             const users = await User.find(); 
-            res.json(users.map(user => mongooseToObject(user))); 
+            res.render('User/users', {
+                title: 'List student of users',
+                users: multipleMongooseToObject(users)
+            });
         } catch (error) {
             next(error); 
         }
+    }
+
+    // [GET] /users/create
+    create(req, res, next) {
+        res.render('User/create');
     }
 
 }
