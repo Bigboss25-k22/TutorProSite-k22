@@ -1,7 +1,9 @@
-const User = require('../models/user');
+const User = require('../models/User');
+const Tutor = require('../models/Tutor'); // Import Tutor model
+const Parent = require('../models/Parent'); // Import Parent model
 
 class AuthController {
-    // [GET] /login
+
     loginForm(req, res, next) {
         res.render('auth/login');
     }
@@ -25,33 +27,50 @@ class AuthController {
     registerForm(req, res, next) {
         res.render('auth/register');
     }
-
     // [POST] /register
     async register(req, res, next) {
         try {
-            const { username, email, password, address, dob, role, class: studentClass, school, student_card_image, education_level, degree_image, subjects } = req.body;
+           // console.log(req.body);
+            const { name, username, email, password, address, role, introduction, specialization } = req.body;
+
+            // Tạo User và lưu vào bảng User
             const user = new User({
                 username,
                 email,
                 password,
                 address,
-                dob,
                 role,
-                student: role === 'student' ? {
-                    class: studentClass,
-                    school,
-                    student_card_image
-                } : undefined,
-                tuto: role === 'tuto' ? {
-                    education_level,
-                    degree_image,
-                    subjects: subjects ? subjects.split(',') : []
-                } : undefined
+                slug: username.toLowerCase().replace(/\s+/g, '-')
             });
-            // Lưu thông tin người dùng vào cơ sở dữ liệu
-            await user.save();
-            // Chuyển hướng người dùng đến trang đăng nhập sau khi đăng ký thành công
-            res.redirect('/login');
+          //  res.json(req.body);
+           // await user.save();
+
+            // Nếu là phụ huynh, lưu thêm vào bảng Parent
+            if (role === 'parent') {
+                const parent = new Parent({
+                    parent_id: user._id, // Liên kết với User
+                    name,
+                    username,
+                    address
+                });
+               // await parent.save();
+            }
+
+            // Nếu là gia sư, lưu thêm vào bảng Tutor
+            if (role === 'tutor') {
+                const tutor = new Tutor({
+                    tutor_id: user._id, // Liên kết với User
+                    name,
+                    username,
+                    introduction,
+                    specialization,
+                    rating: 0, // Mặc định là 0
+                    slug: username.toLowerCase().replace(/\s+/g, '-')
+                });
+              //  await tutor.save();
+            }
+
+            res.redirect('/login'); // Chuyển hướng về trang đăng nhập
         } catch (error) {
             next(error);
         }
