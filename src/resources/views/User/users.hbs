@@ -1,0 +1,21 @@
+<div class="container">
+  <div class="row mt-5">
+    {{#each users}}
+    <div class="preview-card">
+      <div class="preview-card__wrp">
+        <div class="preview-card__item">
+          <div class="preview-card__img">
+            <img src="https://res.cloudinary.com/muhammederdem/image/upload/v1535759872/kuldar-kalvik-799168-unsplash.jpg" alt="">
+          </div>
+          <div class="preview-card__content">
+            <span class="preview-card__code">{{this.role}}</span>
+            <div class="preview-card__title">{{this.username}}</div>
+            <div class="preview-card__text">{{this.address}}</div>
+            <a href="#" class="preview-card__button">READ MORE</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/each}}
+  </div>
+</div>
