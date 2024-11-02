@@ -1,0 +1,25 @@
+<div class="container">
+  <div class="row mt-5">
+    {{#each courses}} <!-- Duyệt qua danh sách khóa học -->
+      <div class="col-md-4 mb-4">
+        <div class="preview-card">
+          <div class="preview-card__wrp">
+            <div class="preview-card__item">
+              <div class="preview-card__img">
+                <img src="https://res.cloudinary.com/muhammederdem/image/upload/v1535759872/kuldar-kalvik-799168-unsplash.jpg" alt="Khóa học">
+              </div>
+              <div class="preview-card__content">
+                <span class="preview-card__code">{{subject}}</span>
+                <div class="preview-card__title">{{course_name}}</div>
+                <p class="preview-card__text">{{description}}</p>
+                <p class="preview-card__status">Trạng thái: {{status}}</p>
+                <p class="preview-card__fee">Học phí: {{fee}} VND</p>
+                <a href="/course/{{course_id}}" class="preview-card__button">Chi tiết</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {{/each}}
+  </div>
+</div>

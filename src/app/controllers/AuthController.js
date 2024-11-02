@@ -4,6 +4,9 @@ const Parent = require('../models/Parent'); // Import Parent model
 
 class AuthController {
 
+    home(req, res, next) {
+        res.render('home');
+    }
     loginForm(req, res, next) {
         res.render('auth/login');
     }
@@ -11,10 +14,18 @@ class AuthController {
     // [POST] /login
     async login(req, res, next) {
         try {
-            const { email, password } = req.body;
-            const user = await User.findOne({ email, password });
+            const { username, password } = req.body;
+            const user = await User.findOne({ username, password });
+    
             if (user) {
-                res.redirect('/users');
+                // Kiểm tra vai trò của người dùng
+                if (user.role === 'tutor') {
+                    res.redirect('/courses');  // Trang danh sách khóa học cho tutor
+                } else if (user.role === 'parent') {
+                    res.redirect('/tutors');  // Trang danh sách gia sư cho parent
+                } else {
+                    res.redirect('/users');  // Trang mặc định nếu role không xác định
+                }
             } else {
                 res.render('auth/login', { error: 'Invalid email or password' });
             }
@@ -22,6 +33,7 @@ class AuthController {
             next(error);
         }
     }
+    
 
     // [GET] /register
     registerForm(req, res, next) {
@@ -30,47 +42,55 @@ class AuthController {
     // [POST] /register
     async register(req, res, next) {
         try {
-           // console.log(req.body);
-            const { name, username, email, password, address, role, introduction, specialization } = req.body;
+          
+            const { name, username, email, password,phone_number, address, role, introduction, specialization } = req.body;
 
             // Tạo User và lưu vào bảng User
             const user = new User({
                 username,
-                email,
                 password,
+                email,
                 address,
                 role,
-                slug: username.toLowerCase().replace(/\s+/g, '-')
+                slug: req.body.username,
+               
             });
-          //  res.json(req.body);
-           // await user.save();
+        //  res.json(user);
+            await user.save();
+          
 
             // Nếu là phụ huynh, lưu thêm vào bảng Parent
             if (role === 'parent') {
                 const parent = new Parent({
-                    parent_id: user._id, // Liên kết với User
+                    _id: user._id,
                     name,
                     username,
-                    address
+                    email,  
+                    address,
+                    phone_number,
+                    slug:req.body.email,
                 });
-               // await parent.save();
+                await parent.save();
             }
 
             // Nếu là gia sư, lưu thêm vào bảng Tutor
             if (role === 'tutor') {
                 const tutor = new Tutor({
-                    tutor_id: user._id, // Liên kết với User
+                    _id: user._id, // Liên kết với User
                     name,
                     username,
-                    introduction,
-                    specialization,
+                    email,  
+                    address,
+                    introduction:req.body.introduction,
+                    specialization:req.body.specialization,
                     rating: 0, // Mặc định là 0
-                    slug: username.toLowerCase().replace(/\s+/g, '-')
+                    slug:req.body.email,
+                   
                 });
-              //  await tutor.save();
+                await tutor.save();
             }
 
-            res.redirect('/login'); // Chuyển hướng về trang đăng nhập
+           res.redirect('/login'); // Chuyển hướng về trang đăng nhập
         } catch (error) {
             next(error);
         }

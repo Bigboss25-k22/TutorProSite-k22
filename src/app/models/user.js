@@ -1,19 +1,30 @@
 const mongoose = require("mongoose");
+const AutoIncrement=require('mongoose-sequence')(mongoose);
 const Schema = mongoose.Schema;
-const slug = require("mongoose-slug-generator");
 
-mongoose.plugin(slug);
-
-const User = new Schema({
+const UserSchema = new Schema({
+  _id: { type: Number },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   address: { type: String, required: true },
-  slug: { type: String, slug: 'username', unique: true },
-  role: { type: String, enum: ['parent',  'tutor'], required: true }, 
-},  {
+  role: { type: String, enum: ['parent', 'tutor'], required: true },
+  slug: { type: String  }, // Tạo slug từ username
+}, {
+  _id: false,
   timestamps: true, // Thêm trường createdAt và updatedAt
-}
-);
+});
 
-module.exports = mongoose.model('User', User);
+// CourseSchema.pre('save', function (next) {
+//   if (this.isModified('subject')) { // Chỉ tạo lại slug khi 'subject' thay đổi
+//     this.slug = slugify(this.subject, { lower: true, strict: true });
+//   }
+//   next();
+// });
+
+UserSchema.plugin(AutoIncrement);
+
+
+
+
+module.exports = mongoose.model('User', UserSchema);

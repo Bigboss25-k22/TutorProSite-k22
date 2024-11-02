@@ -1,12 +1,16 @@
-//const userRouter = require('./user');
+const userRouter = require('./user');
 const authRouter = require('./auth');
-//const tutorRouter = require('./tutor');
+const tutorRouter = require('./tutor');
+const courseRouter = require('./course');
+
 
 function route(app) {
 
-   //app.use('/users', userRouter);
-   app.use('/', authRouter)
-  // app.use('/tutors', tutorRouter)
+  app.use('/', authRouter);  // Thay vì app.use('/', authRouter);
+  app.use('/users', userRouter);
+  app.use('/tutors', tutorRouter);
+  app.use('/courses', courseRouter);
+  
      
 }
 
