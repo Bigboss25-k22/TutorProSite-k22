@@ -1,4 +1,4 @@
-const Tutor = require('../models/Tutor'); // Đảm bảo đường dẫn đúng
+const Tutor = require('../models/Tutor'); 
 const { mongooseToObject } = require('../../util/mongoose');
 
 class TutorController {

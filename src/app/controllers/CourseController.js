@@ -10,10 +10,9 @@ class CourseController {
             next(error);
         }
     }
-     // [GET] /create
-
     
-       createCourseForm(req, res, next){
+     // [GET] /create
+    createCourseForm(req, res, next){
         res.render('Course/create');
     }
      // [POST] /create

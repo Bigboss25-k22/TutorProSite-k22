@@ -5,13 +5,10 @@ const courseRouter = require('./course');
 
 
 function route(app) {
-
-  app.use('/', authRouter);  // Thay vì app.use('/', authRouter);
+  app.use('/', authRouter);  
   app.use('/users', userRouter);
   app.use('/tutors', tutorRouter);
   app.use('/courses', courseRouter);
-  
-     
 }
 
 module.exports = route;

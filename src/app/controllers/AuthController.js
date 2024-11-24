@@ -1,44 +1,52 @@
-const User = require('../models/User');
-const Tutor = require('../models/Tutor'); // Import Tutor model
-const Parent = require('../models/Parent'); // Import Parent model
+const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
+const User = require('../models/User'); // Adjust the path as necessary
+const key = require('../../config/auth.config'); // Adjust the path as necessary
 
 class AuthController {
 
     home(req, res, next) {
         res.render('home');
     }
+
     loginForm(req, res, next) {
         res.render('auth/login');
     }
 
-    // [POST] /login
     async login(req, res, next) {
         try {
-            const { username, password } = req.body;
-            const user = await User.findOne({ username, password });
+            const { username, password } = req.body; // Extract username and password from the request body
+            const user = await User.findOne({ username }); // Find the user by username
     
-            if (user) {
-                // Kiểm tra vai trò của người dùng
-                if (user.role === 'tutor') {
-                    res.redirect('/courses');  // Trang danh sách khóa học cho tutor
-                } else if (user.role === 'parent') {
-                    res.redirect('/tutors');  // Trang danh sách gia sư cho parent
-                } else {
-                    res.redirect('/users');  // Trang mặc định nếu role không xác định
-                }
+            if (user && await bcrypt.compare(password, user.password)) { // Check if the user exists and the password is correct
+                // Generate a token
+                const token = jwt.sign(
+                    { id: user._id, role: user.role }, // Payload: user ID and role
+                    key.secret, // Secret key for signing the token
+                    { expiresIn: '1h' } // Token expiration time
+                );
+    
+                user.password = undefined; // Remove the password from the user object
+    
+                res.status(200).json({ // Use res.status(200).json to send the response
+                    message: "Đăng nhập thành công!",
+                    user,
+                    token
+                });
             } else {
-                res.render('auth/login', { error: 'Invalid email or password' });
+                res.status(401).json({ error: 'Invalid email or password' }); 
             }
         } catch (error) {
-            next(error);
+            console.error('Error during login:', error); 
+            next(error); 
         }
     }
     
-
     // [GET] /register
     registerForm(req, res, next) {
         res.render('auth/register');
     }
+
     // [POST] /register
     async register(req, res, next) {
         try {
@@ -50,10 +58,8 @@ class AuthController {
                 username,
                 password,
                 email,
-                address,
                 role,
                 slug: req.body.username,
-               
             });
         //  res.json(user);
             await user.save();

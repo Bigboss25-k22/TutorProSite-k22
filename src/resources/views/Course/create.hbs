@@ -1,6 +1,6 @@
-<div class="mt-4">
+<div class="mt-4" id="content">
     <h3>Tạo Khóa Học</h3>
-    <form method="POST" action="/courses/create">
+    <form id="createCourseForm">
         <div class="form-group">
             <label for="subject">Môn dạy</label>
             <input type="text" class="form-control" id="subject" name="subject" placeholder="Ví dụ: Hóa" required>
@@ -29,8 +29,7 @@
 
         <div class="form-group">
             <label for="schedule">Thời gian</label>
-            <textarea class="form-control" id="schedule" name="schedule" rows="3" 
-                placeholder="Ví dụ: Bé rảnh T3,6 (17h30 - 19h), T7 (14h - 17h30). Chọn T3,7 hoặc T6,7" required></textarea>
+            <textarea class="form-control" id="schedule" name="schedule" rows="3" placeholder="Ví dụ: Bé rảnh T3,6 (17h30 - 19h), T7 (14h - 17h30). Chọn T3,7 hoặc T6,7" required></textarea>
         </div>
 
         <div class="form-group">
@@ -40,8 +39,7 @@
 
         <div class="form-group">
             <label for="requirements">Yêu cầu gia sư</label>
-            <textarea class="form-control" id="requirements" name="requirements" rows="3" 
-                placeholder="Ví dụ: Sinh viên nữ, Năm 1-2, học khoa Hóa của ĐH Sư Phạm HCM" required></textarea>
+            <textarea class="form-control" id="requirements" name="requirements" rows="3" placeholder="Ví dụ: Sinh viên nữ, Năm 1-2, học khoa Hóa của ĐH Sư Phạm HCM" required></textarea>
         </div>
 
         <div class="form-group">
