@@ -18,7 +18,6 @@ const CourseSchema = new Schema({
   contact: { type: String, required: true },                        // Liên hệ
   status: { type: String, default: "Đang mở" },
   slug:{type: String},
-                       // Trạng thái khóa học
 }, {
   //_id: false,
   timestamps: true, // Tự động thêm createdAt và updatedAt
