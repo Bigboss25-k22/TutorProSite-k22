@@ -1,0 +1,63 @@
+<div class="mt-4">
+    <h3>Tạo Khóa Học</h3>
+    <form method="POST" action="/courses/create">
+        <div class="form-group">
+            <label for="subject">Môn dạy</label>
+            <input type="text" class="form-control" id="subject" name="subject" placeholder="Ví dụ: Hóa" required>
+        </div>
+
+        <div class="form-group">
+            <label for="grade">Lớp dạy</label>
+            <input type="text" class="form-control" id="grade" name="grade" placeholder="Ví dụ: Lớp 10" required>
+        </div>
+
+        <div class="form-group">
+            <label for="address">Địa chỉ</label>
+            <input type="text" class="form-control" id="address" name="address" placeholder="Ví dụ: đường Nguyễn Trãi, phường 3, Quận 5" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="salary">Mức lương</label>
+                <input type="text" class="form-control" id="salary" name="salary" placeholder="Ví dụ: 1.600.000đ/tháng, 200k/buổi" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="sessions">Số buổi</label>
+                <input type="text" class="form-control" id="sessions" name="sessions" placeholder="Ví dụ: 2 buổi/tuần – 120 phút/buổi" required>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="schedule">Thời gian</label>
+            <textarea class="form-control" id="schedule" name="schedule" rows="3" 
+                placeholder="Ví dụ: Bé rảnh T3,6 (17h30 - 19h), T7 (14h - 17h30). Chọn T3,7 hoặc T6,7" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="studentInfo">Thông tin học sinh</label>
+            <input type="text" class="form-control" id="studentInfo" name="studentInfo" placeholder="Ví dụ: học sinh nữ" required>
+        </div>
+
+        <div class="form-group">
+            <label for="requirements">Yêu cầu gia sư</label>
+            <textarea class="form-control" id="requirements" name="requirements" rows="3" 
+                placeholder="Ví dụ: Sinh viên nữ, Năm 1-2, học khoa Hóa của ĐH Sư Phạm HCM" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="teachingMode">Hình thức dạy</label>
+            <select id="teachingMode" class="form-control" name="teachingMode" required>
+                <option value="">Chọn hình thức dạy...</option>
+                <option value="offline">Dạy offline (trực tiếp)</option>
+                <option value="online">Dạy online</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="contact">Liên hệ</label>
+            <input type="text" class="form-control" id="contact" name="contact" placeholder="Ví dụ: 0373.580.580 - 0932.609.268" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Đăng Khóa Học</button>
+    </form>
+</div>

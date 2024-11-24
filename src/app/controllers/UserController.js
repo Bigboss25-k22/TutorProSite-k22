@@ -1,4 +1,4 @@
-const User = require('../models/user');
+const User = require('../models/User');
 const { mongooseToObject, multipleMongooseToObject } = require('../../util/mongoose');
 
 class UserController {

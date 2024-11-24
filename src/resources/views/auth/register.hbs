@@ -3,22 +3,35 @@
     <form method="POST" action="/register">
         <div class="form-row">
             <div class="form-group col-md-6">
+                <label for="inputName">Họ và Tên</label>
+                <input type="text" class="form-control" id="inputName" name="name" placeholder="Họ và Tên" required>
+            </div>
+            <div class="form-group col-md-6">
                 <label for="inputUsername">Username</label>
                 <input type="text" class="form-control" id="inputUsername" name="username" placeholder="Username" required>
             </div>
+        </div>
+
+        <div class="form-row">
             <div class="form-group col-md-6">
-                <label for="inputEmail4">Email</label>
-                <input type="email" class="form-control" id="inputEmail4" name="email" placeholder="Email" required>
+                <label for="inputEmail">Email</label>
+                <input type="email" class="form-control" id="inputEmail" name="email" placeholder="Email" required>
             </div>
             <div class="form-group col-md-6">
-                <label for="inputPassword4">Password</label>
-                <input type="password" class="form-control" id="inputPassword4" name="password" placeholder="Password" required>
+                <label for="inputPassword">Password</label>
+                <input type="password" class="form-control" id="inputPassword" name="password" placeholder="Password" required>
             </div>
         </div>
 
-        <div class="form-group">
-            <label for="inputAddress">Address</label>
-            <input type="text" class="form-control" id="inputAddress" name="address" placeholder="1234 Main St" required>
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputPhone">Số điện thoại</label>
+                <input type="tel" class="form-control" id="inputPhone" name="phone" placeholder="Số điện thoại" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputAddress">Address</label>
+                <input type="text" class="form-control" id="inputAddress" name="address" placeholder="1234 Main St" required>
+            </div>
         </div>
 
         <div class="form-row">
@@ -30,45 +43,21 @@
                 <label for="roleSelect">Role</label>
                 <select id="roleSelect" class="form-control" name="role" required>
                     <option value="">Select Role...</option>
-                    <option value="student">Student</option>
-                    <option value="tuto">Tutor</option>
+                    <option value="parent">Phụ huynh</option>
+                    <option value="tutor">Gia sư</option>
                 </select>
-            </div>
-        </div>
-
-        <!-- Student Fields -->
-        <div id="studentFields" style="display: none;">
-            <div class="form-group">
-                <label for="class">Class</label>
-                <input type="text" class="form-control" id="class" name="class" placeholder="Class">
-            </div>
-            <div class="form-group">
-                <label for="school">School</label>
-                <input type="text" class="form-control" id="school" name="school" placeholder="School">
-            </div>
-            <div class="form-group">
-                <label for="studentCard">Student Card Image</label>
-                <input type="file" class="form-control" id="studentCard" name="student_card_image">
             </div>
         </div>
 
         <!-- Tutor Fields -->
         <div id="tutorFields" style="display: none;">
             <div class="form-group">
-                <label for="educationLevel">Education Level</label>
-                <select id="educationLevel" class="form-control" name="education_level">
-                    <option value="">Select Education Level...</option>
-                    <option value="student">Student</option>
-                    <option value="teacher">Teacher</option>
-                </select>
+                <label for="introduction">Introduction</label>
+                <textarea class="form-control" id="introduction" name="introduction" rows="3" placeholder="Giới thiệu về bản thân"></textarea>
             </div>
             <div class="form-group">
-                <label for="degreeImage">Degree Image</label>
-                <input type="file" class="form-control" id="degreeImage" name="degree_image">
-            </div>
-            <div class="form-group">
-                <label for="subjects">Subjects</label>
-                <input type="text" class="form-control" id="subjects" name="subjects" placeholder="Subjects">
+                <label for="specialization">Specialization</label>
+                <input type="text" class="form-control" id="specialization" name="specialization" placeholder="Chuyên môn">
             </div>
         </div>
 
@@ -77,12 +66,9 @@
 </div>
 
 <script>
-    document.getElementById('roleSelect').addEventListener('change', function() {
-        var studentFields = document.getElementById('studentFields');
+    document.getElementById('roleSelect').addEventListener('change', function () {
         var tutorFields = document.getElementById('tutorFields');
         var role = this.value;
-
-        studentFields.style.display = (role === 'student') ? 'block' : 'none';
-        tutorFields.style.display = (role === 'tuto') ? 'block' : 'none';
+        tutorFields.style.display = (role === 'tutor') ? 'block' : 'none';
     });
 </script>

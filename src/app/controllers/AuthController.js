@@ -1,7 +1,12 @@
-const User = require('../models/user');
+const User = require('../models/User');
+const Tutor = require('../models/Tutor'); // Import Tutor model
+const Parent = require('../models/Parent'); // Import Parent model
 
 class AuthController {
-    // [GET] /login
+
+    home(req, res, next) {
+        res.render('home');
+    }
     loginForm(req, res, next) {
         res.render('auth/login');
     }
@@ -9,10 +14,18 @@ class AuthController {
     // [POST] /login
     async login(req, res, next) {
         try {
-            const { email, password } = req.body;
-            const user = await User.findOne({ email, password });
+            const { username, password } = req.body;
+            const user = await User.findOne({ username, password });
+    
             if (user) {
-                res.redirect('/users');
+                // Kiểm tra vai trò của người dùng
+                if (user.role === 'tutor') {
+                    res.redirect('/courses');  // Trang danh sách khóa học cho tutor
+                } else if (user.role === 'parent') {
+                    res.redirect('/tutors');  // Trang danh sách gia sư cho parent
+                } else {
+                    res.redirect('/users');  // Trang mặc định nếu role không xác định
+                }
             } else {
                 res.render('auth/login', { error: 'Invalid email or password' });
             }
@@ -20,38 +33,64 @@ class AuthController {
             next(error);
         }
     }
+    
 
     // [GET] /register
     registerForm(req, res, next) {
         res.render('auth/register');
     }
-
     // [POST] /register
     async register(req, res, next) {
         try {
-            const { username, email, password, address, dob, role, class: studentClass, school, student_card_image, education_level, degree_image, subjects } = req.body;
+          
+            const { name, username, email, password,phone_number, address, role, introduction, specialization } = req.body;
+
+            // Tạo User và lưu vào bảng User
             const user = new User({
                 username,
-                email,
                 password,
+                email,
                 address,
-                dob,
                 role,
-                student: role === 'student' ? {
-                    class: studentClass,
-                    school,
-                    student_card_image
-                } : undefined,
-                tuto: role === 'tuto' ? {
-                    education_level,
-                    degree_image,
-                    subjects: subjects ? subjects.split(',') : []
-                } : undefined
+                slug: req.body.username,
+               
             });
-            // Lưu thông tin người dùng vào cơ sở dữ liệu
+        //  res.json(user);
             await user.save();
-            // Chuyển hướng người dùng đến trang đăng nhập sau khi đăng ký thành công
-            res.redirect('/login');
+          
+
+            // Nếu là phụ huynh, lưu thêm vào bảng Parent
+            if (role === 'parent') {
+                const parent = new Parent({
+                    _id: user._id,
+                    name,
+                    username,
+                    email,  
+                    address,
+                    phone_number,
+                    slug:req.body.email,
+                });
+                await parent.save();
+            }
+
+            // Nếu là gia sư, lưu thêm vào bảng Tutor
+            if (role === 'tutor') {
+                const tutor = new Tutor({
+                    _id: user._id, // Liên kết với User
+                    name,
+                    username,
+                    email,  
+                    address,
+                    introduction:req.body.introduction,
+                    specialization:req.body.specialization,
+                    rating: 0, // Mặc định là 0
+                    slug:req.body.email,
+                   
+                });
+                await tutor.save();
+            }
+
+           res.redirect('/login'); // Chuyển hướng về trang đăng nhập
         } catch (error) {
             next(error);
         }
