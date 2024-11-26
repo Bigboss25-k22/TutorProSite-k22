@@ -55,48 +55,54 @@ class AuthController {
           
             const { name, username, email, password,phone_number, address, role, introduction, specialization } = req.body;
 
-            const saltRounds = 10; // You can adjust the number of salt rounds as needed
-            const hashedPassword = await bcrypt.hash(password, saltRounds);
-            
             // Tạo User và lưu vào bảng User
             const user = new User({
                 username,
-                password: hashedPassword,
+                password,
                 email,
                 role,
-                slug: req.body.username,
+               
             });
-            //  res.json(user);
+        //  res.json(user);
             await user.save();
           
 
             // Nếu là phụ huynh, lưu thêm vào bảng Parent
             if (role === 'parent') {
                 const parent = new Parent({
-                    username: user.username,
+                    _id: user._id,
                     name,
                     username,
+                    email,  
                     address,
-                    phone_number,
-                    slug:req.body.email,
+                  
+                 
                 });
                 await parent.save();
             }
 
             // Nếu là gia sư, lưu thêm vào bảng Tutor
             if (role === 'tutor') {
+                console.log('Role is tutor:', role); // Thêm log để kiểm tra
                 const tutor = new Tutor({
-                    username: user.username,
+                    _id: user._id, // Liên kết với User
                     name,
                     username,
+                    email,
                     address,
-                    introduction:req.body.introduction,
-                    specialization:req.body.specialization,
-                    rating: 0, 
-                    slug:req.body.email,
-                   
+                    phone_number,
+                    introduction: req.body.introduction || '', // Đảm bảo trường không bị undefined
+                    specialization: req.body.specialization || '', // Đảm bảo trường không bị undefined
+                    rating: 0, // Mặc định là 0
+                    
                 });
+            
+                console.log('Tutor Object:', tutor); // Log đối tượng trước khi lưu
+            
                 await tutor.save();
+                console.log('Tutor saved successfully!');
+            
+            
             }
 
            res.redirect('/login'); // Chuyển hướng về trang đăng nhập

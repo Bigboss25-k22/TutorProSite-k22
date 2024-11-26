@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 const AutoIncrement=require('mongoose-sequence')(mongoose);
 const Schema = mongoose.Schema;
+var slug = require('mongoose-slug-generator');
+
+mongoose.plugin(slug);
 
 const CourseSchema = new Schema({
   _id: { type: String },           // ID khóa học
@@ -20,7 +23,7 @@ const CourseSchema = new Schema({
     type: String,
     default: 'Chưa duyệt'
   },
-  slug:{type: String},
+  slug: { type: String, slug: "subject" ,unique:true},
 }, {
   //_id: false,
   timestamps: true, // Tự động thêm createdAt và updatedAt
