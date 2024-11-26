@@ -15,15 +15,17 @@ class CourseController {
     createCourseForm(req, res, next){
         res.render('Course/create');
     }
-     // [POST] /create
     
+     // [POST] /create
     async createCourse(req, res, next) {
         try {
             // Lấy dữ liệu từ body của yêu cầu
-            const { subject, grade, address, salary, sessions, schedule, studentInfo, requirements, teachingMode, contact } = req.body;
+            const { parent_id, subject, grade, address, salary, sessions, schedule, studentInfo, requirements, teachingMode, contact } = req.body;
 
             // Tạo một đối tượng khóa học mới
             const newCourse = new Course({
+                parent_id, 
+                tutor_id: null,
                 subject,
                 grade,
                 address,
@@ -34,14 +36,14 @@ class CourseController {
                 requirements,
                 teachingMode,
                 contact,
-                slug:subject,
+                slug: subject,
             });
 
             // Lưu khóa học vào cơ sở dữ liệu
             await newCourse.save();
 
-            // Chuyển hướng đến danh sách khóa học hoặc gửi phản hồi thành công
-            res.redirect('/courses'); // Thay đổi đường dẫn nếu cần
+            // Gửi phản hồi thành công
+            res.status(201).json({ message: 'Course created successfully'});
         } catch (error) {
             next(error); // Gọi hàm next để xử lý lỗi
         }

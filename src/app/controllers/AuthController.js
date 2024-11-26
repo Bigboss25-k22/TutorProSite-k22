@@ -1,8 +1,9 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const User = require('../models/User'); // Adjust the path as necessary
-const key = require('../../config/auth.config'); // Adjust the path as necessary
-
+const Tutor = require('../models/Tutor');  
+const Parent = require('../models/Parent');
+const User = require('../models/User'); 
+const key = require('../../config/auth.config'); 
 class AuthController {
 
     home(req, res, next) {
@@ -13,22 +14,23 @@ class AuthController {
         res.render('auth/login');
     }
 
+    // [POST] /login
     async login(req, res, next) {
         try {
-            const { username, password } = req.body; // Extract username and password from the request body
-            const user = await User.findOne({ username }); // Find the user by username
+            const { username, password } = req.body; 
+            const user = await User.findOne({ username }); 
     
-            if (user && await bcrypt.compare(password, user.password)) { // Check if the user exists and the password is correct
+            if (user && await bcrypt.compare(password, user.password)) { 
                 // Generate a token
                 const token = jwt.sign(
-                    { id: user._id, role: user.role }, // Payload: user ID and role
-                    key.secret, // Secret key for signing the token
-                    { expiresIn: '1h' } // Token expiration time
+                    { id: user._id, role: user.role }, 
+                    key.secret, 
+                    { expiresIn: '1h' } 
                 );
     
-                user.password = undefined; // Remove the password from the user object
+                user.password = undefined; 
     
-                res.status(200).json({ // Use res.status(200).json to send the response
+                res.status(200).json({ 
                     message: "Đăng nhập thành công!",
                     user,
                     token
@@ -53,25 +55,27 @@ class AuthController {
           
             const { name, username, email, password,phone_number, address, role, introduction, specialization } = req.body;
 
+            const saltRounds = 10; // You can adjust the number of salt rounds as needed
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
+            
             // Tạo User và lưu vào bảng User
             const user = new User({
                 username,
-                password,
+                password: hashedPassword,
                 email,
                 role,
                 slug: req.body.username,
             });
-        //  res.json(user);
+            //  res.json(user);
             await user.save();
           
 
             // Nếu là phụ huynh, lưu thêm vào bảng Parent
             if (role === 'parent') {
                 const parent = new Parent({
-                    _id: user._id,
+                    username: user.username,
                     name,
                     username,
-                    email,  
                     address,
                     phone_number,
                     slug:req.body.email,
@@ -82,14 +86,13 @@ class AuthController {
             // Nếu là gia sư, lưu thêm vào bảng Tutor
             if (role === 'tutor') {
                 const tutor = new Tutor({
-                    _id: user._id, // Liên kết với User
+                    username: user.username,
                     name,
                     username,
-                    email,  
                     address,
                     introduction:req.body.introduction,
                     specialization:req.body.specialization,
-                    rating: 0, // Mặc định là 0
+                    rating: 0, 
                     slug:req.body.email,
                    
                 });
