@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const courseController = require('../app/controllers/CourseController'); 
-const { authenticateToken, authorizeRoles } = require('../app/middleware/auth.middleware');
+const { authenticateToken, authorizeRoles } = require('../app/middleware/authmiddleware');
 
 router.get('/', courseController.show);
 

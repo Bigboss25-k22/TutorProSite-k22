@@ -1,12 +1,31 @@
+<body>
+  
+
 <div class="container">
+  <div class="pagination">
+    {{#if totalPages}}
+      {{#if (gt currentPage 1)}}
+        <a href="?page={{sub currentPage 1}}" class="prev-arrow">Previous</a>
+      {{/if}}
+
+      {{#each (createPagination currentPage totalPages)}}
+        <a href="?page={{this}}" class="{{#ifEquals this ../currentPage}}active{{/ifEquals}}">{{this}}</a>
+      {{/each}}
+
+      {{#if (lt currentPage totalPages)}}
+        <a href="?page={{add currentPage 1}}" class="next-arrow">Next</a>
+      {{/if}}
+    {{/if}}
+  </div>
+
   <div class="row mt-5">
-    {{#each courses}} <!-- Duyệt qua danh sách khóa học -->
+    {{#each courses}}
       <div class="col-md-4 mb-4">
         <div class="preview-card">
           <div class="preview-card__wrp">
             <div class="preview-card__item">
               <div class="preview-card__img">
-                <img src="https://res.cloudinary.com/muhammederdem/image/upload/v1535759872/kuldar-kalvik-799168-unsplash.jpg" alt="Khóa học">
+                <img src="{{image}}" alt="{{course_name}}">
               </div>
               <div class="preview-card__content">
                 <span class="preview-card__code">{{subject}}</span>
@@ -23,3 +42,6 @@
     {{/each}}
   </div>
 </div>
+<script src="/js/changepage.js">
+</script>
+</body>

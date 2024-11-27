@@ -54,11 +54,12 @@ class AuthController {
         try {
           
             const { name, username, email, password,phone_number, address, role, introduction, specialization } = req.body;
-
+            const saltRounds = 10; // You can adjust the number of salt rounds as needed
+            const hashedPassword = await bcrypt.hash(password, saltRounds);
             // Tạo User và lưu vào bảng User
             const user = new User({
                 username,
-                password,
+                password:hashedPassword,
                 email,
                 role,
                
@@ -110,6 +111,69 @@ class AuthController {
             next(error);
         }
     }
+
+
+    updatePasswordForm(req, res, next) {
+        res.render('auth/updatePassword');
+    }
+
+    // Hàm đổi mật khẩu
+    async  updatePassword(req, res, next) {
+        try {
+            const userId = req.user.id; // Lấy ID người dùng từ token
+            console.log(userId);
+            const { oldPassword, newPassword } = req.body;
+            
+            // Tìm người dùng trong cơ sở dữ liệu
+            const user = await User.findById(userId);
+            
+            if (!user) {
+                return res.status(404).send({ message: 'User not found.' });
+            }
+            
+            // So sánh mật khẩu cũ với mật khẩu trong cơ sở dữ liệu
+            const isMatch = await bcrypt.compare(oldPassword, user.password);
+            
+            if (!isMatch) {
+                return res.status(400).send({ message: 'Old password is incorrect.' });
+            }
+            
+            // Hash mật khẩu mới
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            
+            // Cập nhật mật khẩu mới cho người dùng
+            user.password = hashedPassword;
+            await user.save();
+            
+            return res.status(200).send({ message: 'Password updated successfully.' });
+        } catch (err) {
+            console.error(err);
+            return res.status(500).send({ message: 'Error updating password.' });
+        }
+    }
+
+    // Hàm yêu cầu xác nhận mật khẩu trước khi thay đổi
+    // async requestPasswordChange(req, res, next) {
+    //     try {
+    //         const { oldPassword } = req.body;
+    //         const userId = req.user.id; // Lấy userId từ JWT token
+
+    //         const user = await User.findById(userId);
+    //         if (!user) {
+    //             return res.status(404).json({ message: 'User not found' });
+    //         }
+
+    //         // Kiểm tra mật khẩu cũ
+    //         const isMatch = await bcrypt.compare(oldPassword, user.password);
+    //         if (!isMatch) {
+    //             return res.status(400).json({ message: 'Old password is incorrect' });
+    //         }
+
+    //         res.json({ message: 'Old password matched, you can proceed to change password' });
+    //     } catch (err) {
+    //         next(err);
+    //     }
+    // }
 }
 
 module.exports = new AuthController();

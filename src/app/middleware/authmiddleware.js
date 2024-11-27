@@ -14,6 +14,7 @@ const authenticateToken = (req, res, next) => {
         if (err) {
             return res.status(400).json({ message: 'Invalid token.' });
         }
+        console.log(decoded);
         req.user = decoded;
         next();
     });
@@ -22,6 +23,7 @@ const authenticateToken = (req, res, next) => {
 // Middleware to authorize roles
 const authorizeRoles = (...roles) => (req, res, next) => {
     if (!roles.includes(req.user.role)) {
+        console.log(roles);
         return res.status(403).json({ message: 'Access denied.' });
     }
     next();

@@ -4,10 +4,31 @@ const { mongooseToObject } = require('../../util/mongoose');
 class CourseController {
     async show(req, res, next) {
         try {
-            const courses = await Course.find({});
-            res.render('Course/courses', { courses: courses.map(course => mongooseToObject(course)) });
+            const page = parseInt(req.query.page) || 1; // Trang hiện tại
+            const limit = parseInt(req.query.limit) || 2; // Số lượng khóa học mỗi trang
+            const skip = (page - 1) * limit; // Số lượng bỏ qua để lấy trang hiện tại
+    
+            // Đếm tổng số khóa học
+            const total = await Course.countDocuments({ status: 'Đã duyệt' });
+    
+            // Lấy danh sách khóa học với phân trang
+            const courses = await Course.find({ status: 'Đã duyệt' })
+                                     .skip(skip)
+                                     .limit(limit);
+    
+            // Tính tổng số trang
+            const totalPages = Math.ceil(total / limit);
+            // console.log('Current Page:', page);
+            // console.log('Total Pages:', totalPages);
+
+            // Trả về danh sách khóa học và thông tin phân trang
+            res.render('Course/courses', {
+                courses: courses.map(course => mongooseToObject(course)), // Chuyển đổi Mongoose Object sang Object thông thường
+                currentPage: page,
+                totalPages: totalPages,
+            });
         } catch (error) {
-            next(error);
+            next(error); // Xử lý lỗi
         }
     }
     
