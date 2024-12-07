@@ -58,7 +58,7 @@ class AuthController {
     // [POST] /register
     async register(req, res, next) {
         try {
-            const { name, username, email, password, phone_number, address, role, introduction, specialization } = req.body;
+            const { name, email, password, phone_number, address, role, introduction, specialization } = req.body;
 
 
             const saltRounds = 10;
@@ -67,13 +67,12 @@ class AuthController {
 
             // Tạo User và lưu vào bảng User
             const user = new User({
-                username,
-                password,
+                password:hashedPassword,
                 email,
                 role,
 
             });
-
+console.log("emali",email);
                
   
             await user.save();
@@ -81,11 +80,11 @@ class AuthController {
             // Nếu là phụ huynh, lưu thêm vào bảng Parent
             if (role === 'parent') {
                 const parent = new Parent({
-
+                    _id:user._id,
                     name,
                     address,
                     phone_number,
-                    slug: username,
+                   // slug: username,
 
                 });
                 await parent.save();
@@ -95,7 +94,7 @@ class AuthController {
             if (role === 'tutor') {
                 console.log('Role is tutor:', role); // Thêm log để kiểm tra
                 const tutor = new Tutor({
-
+                    _id:user._id,
                     name,
                     address,
                     phone_number,

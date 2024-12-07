@@ -8,7 +8,7 @@ mongoose.plugin(slug);
 
 const UserSchema = new Schema({
   _id: { type: Number },
-  username: { type: String, required: true, unique: true },
+ 
   password: { type: String, required: true },
   email: { type: String, required: true, unique: true },
   role: { type: String, enum: ['parent', 'tutor'], required: true },
