@@ -60,32 +60,42 @@ class AuthController {
         try {
             const { name, username, email, password, phone_number, address, role, introduction, specialization } = req.body;
 
+
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
+
 
             // Tạo User và lưu vào bảng User
             const user = new User({
                 username,
-                password: hashedPassword,
+                password,
                 email,
                 role,
+
             });
+
+               
+  
             await user.save();
 
             // Nếu là phụ huynh, lưu thêm vào bảng Parent
             if (role === 'parent') {
                 const parent = new Parent({
+
                     name,
                     address,
                     phone_number,
                     slug: username,
+
                 });
                 await parent.save();
             }
 
             // Nếu là gia sư, lưu thêm vào bảng Tutor
             if (role === 'tutor') {
+                console.log('Role is tutor:', role); // Thêm log để kiểm tra
                 const tutor = new Tutor({
+
                     name,
                     address,
                     phone_number,
@@ -94,6 +104,7 @@ class AuthController {
                     rating: 0, 
                 });
                 await tutor.save(); 
+
             }
 
             res.redirect('/login'); // Chuyển hướng về trang đăng nhập

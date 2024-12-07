@@ -7,6 +7,7 @@ const Schema = mongoose.Schema;
 mongoose.plugin(slug);
 
 const UserSchema = new Schema({
+  _id: { type: Number },
   username: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   email: { type: String, required: true, unique: true },
@@ -15,5 +16,8 @@ const UserSchema = new Schema({
 }, {
   timestamps: true, 
 });
+
+// Tự động tăng _id
+UserSchema.plugin(AutoIncrement, { id: 'user_seq', inc_field: '_id' });
 
 module.exports = mongoose.model('User', UserSchema);
