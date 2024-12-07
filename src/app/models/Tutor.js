@@ -13,7 +13,7 @@ const TutorSchema = new Schema(
   {
     _id: { type: Number },
     name: { type: String, required: true },
-
+    phoneNumber: { type: String },
     address: { type: String, required: true },
     introduction: { type: String, required: true },
     specialization: { type: String, required: true },

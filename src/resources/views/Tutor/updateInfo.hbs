@@ -1,0 +1,41 @@
+<div class="mt-4">
+    <h3>Cập nhật thông tin Gia sư</h3>
+    <form method="POST" action="/tutors/updateInfo">
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputName">Họ và Tên</label>
+                <input type="text" class="form-control" id="inputName" name="name" placeholder="Họ và Tên" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputPhone">Số điện thoại</label>
+                <input type="tel" class="form-control" id="inputPhone" name="phoneNumber" placeholder="Số điện thoại" required>
+            </div>
+            <div class="form-group col-md-6">
+                <label for="inputAddress">Địa chỉ</label>
+                <input type="text" class="form-control" id="inputAddress" name="address" placeholder="1234 Main St" required>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-6">
+                <label for="inputDob">Ngày sinh</label>
+                <input type="date" class="form-control" id="inputDob" name="dob" required>
+            </div>
+        </div>
+
+        <!-- Tutor-Specific Fields -->
+        <div class="form-group">
+            <label for="introduction">Giới thiệu</label>
+            <textarea class="form-control" id="introduction" name="introduction" rows="3" placeholder="Giới thiệu về bản thân"></textarea>
+        </div>
+        <div class="form-group">
+            <label for="specialization">Chuyên môn</label>
+            <input type="text" class="form-control" id="specialization" name="specialization" placeholder="Chuyên môn">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Cập nhật</button>
+    </form>
+</div>

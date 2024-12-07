@@ -23,8 +23,9 @@ class AuthController {
     // [POST] /login
     async login(req, res, next) {
         try {
-            const { username, password } = req.body; 
-            const user = await User.findOne({ username }); 
+            const { email, password } = req.body; 
+            const user = await User.findOne({ email }); 
+            
     
             if (user && await bcrypt.compare(password, user.password)) { 
                 // Generate a token
@@ -33,7 +34,7 @@ class AuthController {
                     key.secret, 
                     { expiresIn: '1h' } 
                 );
-    
+                
                 user.password = undefined; 
     
                 res.status(200).json({ 
@@ -59,7 +60,7 @@ class AuthController {
     async register(req, res, next) {
         try {
 
-            const { name, email, password, phone_number, address, role, introduction, specialization } = req.body;
+            const { name, email, password, phoneNumber, address, role, introduction, specialization } = req.body;
 
 
             const saltRounds = 10;
@@ -84,7 +85,7 @@ class AuthController {
                     _id:user._id,
                     name,
                     address,
-                    phone_number,
+                    phoneNumber,
                   
 
                 });
@@ -98,7 +99,7 @@ class AuthController {
                     _id:user._id,
                     name,
                     address,
-                    phone_number,
+                    phoneNumber,
                     introduction: req.body.introduction || '', 
                     specialization: req.body.specialization || '', 
                     rating: 0, 

@@ -1,5 +1,6 @@
 const Tutor = require('../models/Tutor'); 
 const { mongooseToObject } = require('../../util/mongoose');
+const { render } = require('node-sass');
 
 class TutorController {
     async show(req, res, next) {
@@ -34,6 +35,45 @@ class TutorController {
             next(error); // Gọi middleware lỗi nếu có
         }
     }
+    async updateInforForm( req, res, next){
+        res.render('/Tutor/updateInfo');
+    }
+
+    async updateInfor(req, res, next) {
+        try {
+            // Lấy ID của tutor hiện tại từ session hoặc JWT (giả sử req.user chứa thông tin tutor đang đăng nhập)
+            const tutorId = req.user.id;
+    
+            // Lấy thông tin cần cập nhật từ form gửi lên
+            const { name, address, introduction,phoneNumber, specialization } = req.body;
+    
+            // Tìm và cập nhật thông tin gia sư
+            const updatedTutor = await Tutor.findByIdAndUpdate(
+                tutorId, // ID của gia sư
+                { 
+                    name,
+                    phoneNumber,
+                    address,
+                    introduction,
+                    specialization,
+                },
+                { new: true, runValidators: true } // Trả về tutor sau khi cập nhật và kiểm tra validation
+            );
+    
+            if (!updatedTutor) {
+                // Nếu không tìm thấy gia sư
+                return res.status(404).send("Tutor not found");
+            }
+    
+            // Cập nhật thành công, chuyển hướng hoặc trả JSON
+            res.redirect('/tutors'); // Redirect đến trang hồ sơ của gia sư (hoặc trang khác)
+        } catch (error) {
+            console.error(error);
+            next(error); // Xử lý lỗi
+        }
+    }
+    
+
 }
 
 

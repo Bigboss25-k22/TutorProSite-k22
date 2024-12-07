@@ -3,6 +3,8 @@ const authRouter = require('./auth');
 const tutorRouter = require('./tutor');
 const courseRouter = require('./course');
 const adminRouter = require('./admin');
+const parnetRouter = require('./parent');
+
 
 
 function route(app) {
@@ -11,6 +13,7 @@ function route(app) {
   app.use('/users', userRouter);
   app.use('/tutors', tutorRouter);
   app.use('/courses', courseRouter);
+  app.use('/parents', parnetRouter);
 }
 
 module.exports = route;

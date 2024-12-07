@@ -6,7 +6,7 @@ const ParentSchema = new mongoose.Schema({
     _id: { type: Number },
     name: { type: String, required: true },
     address: { type: String, required: true },
-    phone_number: { type: String },
+    phoneNumber: { type: String },
     slug: { type: String  }, 
 },
 {
