@@ -14,8 +14,7 @@ const TutorSchema = new Schema(
   {
     _id: { type: Number },
     name: { type: String, required: true },
-    username: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+
     address: { type: String, required: true },
     introduction: { type: String, required: true },
     specialization: { type: String, required: true },
@@ -27,7 +26,9 @@ const TutorSchema = new Schema(
     },  // Trạng thái (Chưa duyệt, Đã duyệt)
   },
   {
-    timestamps: true,
+
+    timestamps: true, 
+
   }
 );
 
