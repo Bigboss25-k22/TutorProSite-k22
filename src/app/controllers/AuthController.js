@@ -152,28 +152,7 @@ class AuthController {
         }
     }
 
-    // Hàm yêu cầu xác nhận mật khẩu trước khi thay đổi
-    // async requestPasswordChange(req, res, next) {
-    //     try {
-    //         const { oldPassword } = req.body;
-    //         const userId = req.user.id; // Lấy userId từ JWT token
-
-    //         const user = await User.findById(userId);
-    //         if (!user) {
-    //             return res.status(404).json({ message: 'User not found' });
-    //         }
-
-    //         // Kiểm tra mật khẩu cũ
-    //         const isMatch = await bcrypt.compare(oldPassword, user.password);
-    //         if (!isMatch) {
-    //             return res.status(400).json({ message: 'Old password is incorrect' });
-    //         }
-
-    //         res.json({ message: 'Old password matched, you can proceed to change password' });
-    //     } catch (err) {
-    //         next(err);
-    //     }
-    // }
+    
 }
 
 module.exports = new AuthController();
