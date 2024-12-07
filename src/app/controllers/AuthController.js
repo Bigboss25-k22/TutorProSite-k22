@@ -68,13 +68,12 @@ class AuthController {
 
             // Tạo User và lưu vào bảng User
             const user = new User({
-
                 password:hashedPassword,
                 email,
                 role,
 
             });
-console.log("emali",email);
+      
                
   
             await user.save();
@@ -86,7 +85,7 @@ console.log("emali",email);
                     name,
                     address,
                     phone_number,
-                   // slug: username,
+                  
 
                 });
                 await parent.save();
@@ -94,7 +93,7 @@ console.log("emali",email);
 
             // Nếu là gia sư, lưu thêm vào bảng Tutor
             if (role === 'tutor') {
-                console.log('Role is tutor:', role); // Thêm log để kiểm tra
+              
                 const tutor = new Tutor({
                     _id:user._id,
                     name,

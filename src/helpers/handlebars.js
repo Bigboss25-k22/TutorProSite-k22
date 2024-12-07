@@ -1,5 +1,5 @@
 const Handlebars = require('handlebars');
-const User = require('../app/models/User');
+const User = require('../app/models/user');
 const Course = require('../app/models/Course');
 
 const { mutipleMongooseToObject } = require('../util/mongoose');
