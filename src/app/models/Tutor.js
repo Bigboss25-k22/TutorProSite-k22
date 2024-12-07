@@ -10,7 +10,6 @@ const TutorSchema = new Schema(
   {
     username: { type: String, required: true },
     name: { type: String, required: true },
-    username: { type: String, required: true }, // "nguyenvanb",
     address: { type: String, required: true },
     introduction: { type: String, required: true }, // "Tôi là giáo viên toán cấp 3..."
     specialization: { type: String, required: true }, // "Toán học"
@@ -22,7 +21,6 @@ const TutorSchema = new Schema(
     slug: { type: String  }, // Tạo slug từ username
   },
   {
-    _id: false,
     timestamps: true, 
   }
 );
