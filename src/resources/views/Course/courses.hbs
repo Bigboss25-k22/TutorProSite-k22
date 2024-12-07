@@ -1,25 +1,119 @@
-<div class="container">
-  <div class="row mt-5">
-    {{#each courses}} <!-- Duyệt qua danh sách khóa học -->
-      <div class="col-md-4 mb-4">
-        <div class="preview-card">
-          <div class="preview-card__wrp">
-            <div class="preview-card__item">
-              <div class="preview-card__img">
-                <img src="https://res.cloudinary.com/muhammederdem/image/upload/v1535759872/kuldar-kalvik-799168-unsplash.jpg" alt="Khóa học">
-              </div>
-              <div class="preview-card__content">
-                <span class="preview-card__code">{{subject}}</span>
-                <div class="preview-card__title">{{course_name}}</div>
-                <p class="preview-card__text">{{description}}</p>
-                <p class="preview-card__status">Trạng thái: {{status}}</p>
-                <p class="preview-card__fee">Học phí: {{fee}} VND</p>
-                <a href="/course/{{course_id}}" class="preview-card__button">Chi tiết</a>
-              </div>
+<body id="courseslist">
+    <!-- Banner Area -->
+    <section class="banner-area organic-breadcrumb">
+        <div class="container">
+            <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+                <div class="text-center">
+                    <h1>Danh sách lớp học</h1>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-    {{/each}}
-  </div>
-</div>
+    </section>
+
+    <!-- Filter Sidebar -->
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-3 col-lg-4 col-md-5">
+                <div class="sidebar-categories">
+                    <div class="head">Lọc theo tiêu chí</div>
+                    <ul class="main-courses">
+                        <li class="main-nav-list">
+                            <input type="checkbox" name="subject" value="math" id="math">
+                            <label for="math">Toán </label>
+                        </li>
+                        <li class="main-nav-list">
+                            <input type="checkbox" name="subject" value="physics" id="physics">
+                            <label for="physics">Lý </label>
+                        </li>
+                        <li class="main-nav-list">
+                            <input type="checkbox" name="subject" value="chemistry" id="chemistry">
+                            <label for="chemistry">Hóa </label>
+                        </li>
+                        <li class="main-nav-list">
+                            <input type="checkbox" name="grade" value="primary" id="primary">
+                            <label for="primary">Tiểu học </label>
+                        </li>
+                        <li class="main-nav-list">
+                            <input type="checkbox" name="grade" value="secondary" id="secondary">
+                            <label for="secondary">THCS </label>
+                        </li>
+                        <li class="main-nav-list">
+                            <input type="checkbox" name="grade" value="highschool" id="highschool">
+                            <label for="highschool">THPT </label>
+                        </li>
+                        <li class="main-nav-list">
+                            <input type="checkbox" name="teachingMode" value="online" id="online">
+                            <label for="online">Online </label>
+                        </li>
+                        <li class="main-nav-list">
+                            <input type="checkbox" name="teachingMode" value="offline" id="offline">
+                            <label for="offline">Offline </label>
+                        </li>
+                        <li class="main-nav-list">
+                            <input type="checkbox" name="sexTutor" value="male" id="male">
+                            <label for="male">Nam </label>
+                        </li>
+                        <li class="main-nav-list">
+                            <input type="checkbox" name="sexTutor" value="female" id="female">
+                            <label for="female">Nữ </label>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Courses List -->
+            <div class="col-xl-9 col-lg-8 col-md-7">
+                <div class="search-bar">
+                    <input type="text" id="search_input" placeholder="Tìm kiếm lớp học...">
+                </div>
+                <section class="lattest-product-area pb-40 category-list">
+                    <div class="row" id="course-list">
+                        <!-- Khóa học sẽ được render ở đây -->
+                          {{#each courses}}
+                        <div class="col-lg-4 col-md-6">
+                            <div class="single-product">
+                                <a href="/product/product-details/{{this.slug}}">
+                                    <img class="img-fluid" src="/{{this.image}}" alt="{{this.subject}}">
+                                </a>
+                                <div class="product-details">
+                                    <a href="/product/product-details/{{this.slug}}">
+                                        <h6>{{this.grade}}</h6>
+                                    </a>
+                                    <div class="price">
+                                        <h6>{{this.fee}}</h6>
+                                     
+                                      
+                                    </div>
+                                      <h6>{{this.sexTutor}}</h6>
+                               
+                                </div>
+                            </div>
+                        </div>
+                        {{/each}}
+                    </div>
+                </section>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination">
+                    <!-- Nội dung phân trang -->
+                      {{#if totalPages}}
+                            {{#if (gt currentPage 1)}}
+                                <a href="#" onclick="changePage({{sub currentPage 1}})" class="prev-arrow">Previous</a>
+                            {{/if}}
+
+                            {{#each (createPagination currentPage totalPages)}}
+                                <a href="#" class="{{#ifEquals this ../currentPage}}active{{/ifEquals}}" onclick="changePage({{this}})" >{{this}}</a>
+                            {{/each}}
+
+                            {{#if (lt currentPage totalPages)}}
+                                <a href="#" class="next-arrow" onclick="changePage({{add currentPage 1}})">Next</a>
+                            {{/if}}
+                        {{/if}}
+                </div>
+            </div>
+        </div>  
+    </div> 
+
+    <script src="/js/changPageNext.js" ></script>
+
+</body>

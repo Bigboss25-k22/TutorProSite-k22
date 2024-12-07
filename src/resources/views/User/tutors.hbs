@@ -13,7 +13,24 @@
 <body>
   <div class="container mt-5">
     <h1 class="text-center mb-4">Danh sách Gia sư</h1>
+ <div class="pagination">
+      {{#if totalPages}}
+        <!-- Liên kết trang trước -->
+        {{#if (gt currentPage 1)}}
+          <a href="?page={{sub currentPage 1}}" class="prev-arrow">Previous</a>
+        {{/if}}
 
+        <!-- Các số trang -->
+        {{#each (createPagination currentPage totalPages)}}
+          <a href="?page={{this}}" class="{{#ifEquals this ../currentPage}}active{{/ifEquals}}">{{this}}</a>
+        {{/each}}
+
+        <!-- Liên kết trang tiếp theo -->
+        {{#if (lt currentPage totalPages)}}
+          <a href="?page={{add currentPage 1}}" class="next-arrow">Next</a>
+        {{/if}}
+      {{/if}}
+    </div>
     <div class="row">
       {{#each tutors}} <!-- Duyệt qua danh sách gia sư -->
         <div class="col-md-4 mb-4">
@@ -39,7 +56,9 @@
   </div>
 
   <script 
-    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js">
+    {{!-- src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" --}}
+    src="/js/changepage.js"
+    >
   </script>
 </body>
 </html>

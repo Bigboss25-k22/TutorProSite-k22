@@ -58,6 +58,7 @@ class AuthController {
     // [POST] /register
     async register(req, res, next) {
         try {
+
             const { name, email, password, phone_number, address, role, introduction, specialization } = req.body;
 
 
@@ -67,6 +68,7 @@ class AuthController {
 
             // Tạo User và lưu vào bảng User
             const user = new User({
+
                 password:hashedPassword,
                 email,
                 role,
@@ -111,6 +113,49 @@ console.log("emali",email);
             next(error);
         }
     }
+
+
+
+    updatePasswordForm(req, res, next) {
+        res.render('auth/updatePassword');
+    }
+
+    // Hàm đổi mật khẩu
+    async  updatePassword(req, res, next) {
+        try {
+            const userId = req.user.id; // Lấy ID người dùng từ token
+            console.log(userId);
+            const { oldPassword, newPassword } = req.body;
+            
+            // Tìm người dùng trong cơ sở dữ liệu
+            const user = await User.findById(userId);
+            
+            if (!user) {
+                return res.status(404).send({ message: 'User not found.' });
+            }
+            
+            // So sánh mật khẩu cũ với mật khẩu trong cơ sở dữ liệu
+            const isMatch = await bcrypt.compare(oldPassword, user.password);
+            
+            if (!isMatch) {
+                return res.status(400).send({ message: 'Old password is incorrect.' });
+            }
+            
+            // Hash mật khẩu mới
+            const hashedPassword = await bcrypt.hash(newPassword, 10);
+            
+            // Cập nhật mật khẩu mới cho người dùng
+            user.password = hashedPassword;
+            await user.save();
+            
+            return res.status(200).send({ message: 'Password updated successfully.' });
+        } catch (err) {
+            console.error(err);
+            return res.status(500).send({ message: 'Error updating password.' });
+        }
+    }
+
+    
 
         // Các phương thức hiện tại của AuthController...
 
@@ -196,6 +241,7 @@ console.log("emali",email);
             });
         }
     }   
+
 
 }
 

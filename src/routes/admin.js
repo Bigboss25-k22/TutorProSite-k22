@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const AdminController = require('../app/controllers/AdminController'); 
-const { authenticateToken, authorizeRoles } = require('../app/middleware/auth.middleware');
+const { authenticateToken, authorizeRoles } = require('../app/middleware/authmiddleware');
 
 
 router.get('/tutor', authenticateToken, authorizeRoles('admin'), AdminController.showTutor);
