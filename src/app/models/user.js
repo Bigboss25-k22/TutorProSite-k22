@@ -14,7 +14,6 @@ const UserSchema = new Schema({
   role: { type: String, enum: ['parent', 'tutor'], required: true },
   slug: { type: String}, 
 }, {
-  _id: false,
   timestamps: true, 
 });
 
