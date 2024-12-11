@@ -12,6 +12,7 @@ router.post('/create', authenticateToken, authorizeRoles('parent'), courseContro
  router.get('/filter',courseController.getFilteredCourses);
  router.get('/search',courseController.SearchCourse);
 
+ router.get('/:slug',courseController.showDetail);
 
 module.exports = router;
      

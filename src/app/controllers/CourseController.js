@@ -34,14 +34,32 @@ class CourseController {
         }
     }
     
+    async showDetail(req, res, next) {
+        try {
+            const slug = req.params.slug; // Lấy slug từ URL
+            const course = await Course.findOne({ slug });
+    
+            if (!course) {
+                return res.status(404).json({ message: "Course not found" });
+            }
+    
+            res.json({
+                course: mongooseToObject(course),
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error retrieving course details', error });
+        }
+    }
+    
     // [POST] /create
     async createCourse(req, res, next) {
         try {
             const {
                 parent_id, subject, grade, address, salary, sessions, schedule, 
-                studentInfo, requirements, teachingMode, contact
+                studentInfo, requirements, teachingMode, contact, sexTutor
             } = req.body;
-
+    
             const newCourse = new Course({
                 parent_id, 
                 tutor_id: null,
@@ -55,16 +73,18 @@ class CourseController {
                 requirements,
                 teachingMode,
                 contact,
+                sexTutor,
                 slug: subject,
             });
-
+    
             await newCourse.save();
-
+    
             res.status(201).json({ message: 'Course created successfully', course: mongooseToObject(newCourse) });
         } catch (error) {
             next(error);
         }
     }
+    
 
     // [GET] /search
     async SearchCourse(req, res, next) {
@@ -152,6 +172,8 @@ class CourseController {
             res.status(500).json({ message: 'Error filtering courses', error });
         }
     }
+
+
 }
 
 module.exports = new CourseController();

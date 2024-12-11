@@ -59,6 +59,53 @@ class TutorController {
             res.status(500).json({ message: 'Error updating tutor information', error });
         }
     }
+
+    async showDetail(req, res,next) {
+        try {
+            // Lấy slug từ params
+            const slug = req.params.slug;
+    
+            // Tìm tutor theo slug
+            const tutor = await Tutor.findOne({ slug });
+    
+            if (!tutor) {
+                return res.status(404).json({ message: 'Tutor not found' });
+            }
+    
+            // Trả về thông tin gia sư
+            res.status(200).json({
+                message: 'Tutor details retrieved successfully',
+                tutor: mongooseToObject(tutor),
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error fetching tutor details', error });
+        }
+    }
+    
+
+    async getRatings(req, res, next) {
+        try {
+            const tutorId = req.params.tutorId;
+            const ratings = await Rating.find({ tutorId }).populate("parentId", "name");
+    
+            // Trả về danh sách đánh giá dưới dạng JSON
+            res.status(200).json({
+                message: 'Ratings retrieved successfully',
+                ratings: ratings.map(rating => ({
+                    id: rating._id,
+                    parentName: rating.parentId.name,
+                    ratingValue: rating.rating,
+                    comment: rating.comment,
+                    createdAt: rating.createdAt
+                }))
+            });
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ message: 'Error retrieving ratings', error });
+        }
+    }
+    
 }
 
 module.exports = new TutorController();
