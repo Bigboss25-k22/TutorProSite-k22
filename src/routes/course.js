@@ -4,7 +4,12 @@ const router = express.Router();
 const courseController = require('../app/controllers/CourseController'); 
 const { authenticateToken, authorizeRoles } = require('../app/middleware/authmiddleware');
 
-router.get('/', courseController.show);
+
+
+// Register course
+router.post('/register-Course', authenticateToken, authorizeRoles('tutor'), courseController.registerCourse);
+
+//Detail course
 
 router.get('/create', authenticateToken, authorizeRoles('parent'), courseController.createCourseForm);
 router.post('/create', authenticateToken, authorizeRoles('parent'), courseController.createCourse);
@@ -12,6 +17,7 @@ router.post('/create', authenticateToken, authorizeRoles('parent'), courseContro
 router.get('/filter',courseController.getFilteredCourses);
 router.get('/search',courseController.SearchCourse);
 
+router.get('/', courseController.show);
 
 module.exports = router;
      

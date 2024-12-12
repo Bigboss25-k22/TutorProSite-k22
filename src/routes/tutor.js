@@ -6,6 +6,8 @@ const { authenticateToken, authorizeRoles } = require('../app/middleware/authmid
 
 // Route lấy danh sách gia sư
 router.get('/', tutorController.show);
+
+//Detail tutor
 router.get('/updateInfo', authenticateToken, authorizeRoles('tutor'),tutorController.updateInforForm);
 router.post('/updateInfo',authenticateToken, authorizeRoles('tutor'),tutorController.updateInfor);
 

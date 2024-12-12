@@ -23,7 +23,7 @@ class TutorController {
             const totalPages = Math.ceil(total / limit);
             console.log(tutors);
              // Trả về kết quả dưới dạng JSON hoặc render view tùy vào yêu cầu
-            res.render('User/tutors', {
+            res.json ({
                 tutors: tutors.map(tutor => mongooseToObject(tutor)), // Chuyển đổi Mongoose Object sang Object thông thường
                 currentPage: page,
                 totalPages: totalPages,

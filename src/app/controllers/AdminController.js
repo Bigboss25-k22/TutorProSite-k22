@@ -1,6 +1,7 @@
 const Tutor = require('../models/Tutor');
 const Course = require('../models/Course');
 const { mongooseToObject } = require('../../util/mongoose');
+const Registration = require('../models/Registration');
 
 class TutorController {
     // [GET] /tutor
@@ -80,6 +81,45 @@ class TutorController {
             next(error);
         }
     }
+
+    // [GET] /course/register
+    async ShowregisterCourse(req, res, next) {
+        try {
+            // Find all registrations and populate userId with Tutor model
+            const registrations = await Registration.find({}).populate('userId', 'name email'); // Assuming 'name' and 'email' are fields in Tutor model
+
+            // Group registrations by courseId
+            const courses = {};
+            registrations.forEach(registration => {
+                const courseId = registration.courseId;
+                if (!courses[courseId]) {
+                    courses[courseId] = {
+                        courseId: courseId,
+                        tutors: []
+                    };
+                }
+                courses[courseId].tutors.push({
+                    tutor: registration.userId,
+                    registeredAt: registration.registeredAt
+                });
+            });
+
+            // Convert courses object to array
+            const coursesArray = Object.values(courses);
+
+            // Return the grouped data
+            res.json(coursesArray.map(course => ({
+                courseId: course.courseId,
+                tutors: course.tutors.map(tutor => ({
+                    tutor: mongooseToObject(tutor.tutor),
+                    registeredAt: tutor.registeredAt
+                }))
+            })));
+        } catch (error) {
+            next(error);
+        }
+    }
+
 
 }
 
