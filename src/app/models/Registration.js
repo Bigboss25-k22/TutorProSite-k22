@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const RegistrationSchema = new Schema({
-    userId: { type: Number, ref: 'User', required: true },
+    userId: { type: Number, ref: 'Tutor', required: true },
     courseId: {  type: String, ref: 'Course', required: true },
     registeredAt: { type: Date, default: Date.now }
 });

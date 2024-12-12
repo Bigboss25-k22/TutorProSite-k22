@@ -130,13 +130,14 @@ class CourseController {
             // Create a new registration entry
             const newRegistration = new Registration({
                 userId: tutorId,
-                courseId: courseId
+                courseId: courseId,
+                status: 'pending'
             });
 
             await newRegistration.save();
 
             // Registration successful, send JSON response
-            res.status(200).json({ message: 'Registration successful' });
+            res.status(200).json({ message: 'Đăng ký khóa học thành công' });
         } catch (error) {
             console.error(error);
             next(error); // Handle error
