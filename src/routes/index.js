@@ -5,11 +5,11 @@ const courseRouter = require('./course');
 const adminRouter = require('./admin');
 const parnetRouter = require('./parent');
 
-
+const { authenticateToken, authorizeRoles } = require('../app/middleware/authmiddleware');
 
 function route(app) {
   app.use('/', authRouter);  
-  app.use('/admin', adminRouter);
+  app.use('/admin', authenticateToken, authorizeRoles('admin'), adminRouter);
   app.use('/users', userRouter);
   app.use('/tutors', tutorRouter);
   app.use('/courses', courseRouter);

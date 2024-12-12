@@ -1,5 +1,6 @@
 const Course = require('../models/Course');
-const { mongooseToObject, multipleMongooseToObject } = require('../../util/mongoose');
+const { mongooseToObject,multipleMongooseToObject } = require('../../util/mongoose');
+const Registration = require('../models/Registration');
 
 class CourseController {
     // [GET] /courses
@@ -117,7 +118,31 @@ class CourseController {
             next(error);
         }
     }
+  
+    async registerCourse(req, res, next) {
+        try {
+            // Get tutor ID from session or JWT (assuming req.user contains the logged-in tutor's info)
+            const tutorId = req.user.id;
 
+            // Get course ID from the request body
+            const { courseId } = req.body;
+
+            // Create a new registration entry
+            const newRegistration = new Registration({
+                userId: tutorId,
+                courseId: courseId
+            });
+
+            await newRegistration.save();
+
+            // Registration successful, send JSON response
+            res.status(200).json({ message: 'Registration successful' });
+        } catch (error) {
+            console.error(error);
+            next(error); // Handle error
+        }
+    }
+    
     // [GET] /filter
     async getFilteredCourses(req, res, next) {
         try {
