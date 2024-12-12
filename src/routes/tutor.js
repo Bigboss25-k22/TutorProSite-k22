@@ -11,4 +11,10 @@ router.get('/', tutorController.show);
 router.get('/updateInfo', authenticateToken, authorizeRoles('tutor'),tutorController.updateInforForm);
 router.post('/updateInfo',authenticateToken, authorizeRoles('tutor'),tutorController.updateInfor);
 
+
+router.get('/:slug', tutorController.showDetail);
+router.get('/:slug/rating', tutorController.getRatings);
+
+
+
 module.exports = router;

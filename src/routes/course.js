@@ -11,11 +11,13 @@ router.post('/register-Course', authenticateToken, authorizeRoles('tutor'), cour
 
 //Detail course
 
-router.get('/create', authenticateToken, authorizeRoles('parent'), courseController.createCourseForm);
+//router.get('/create', authenticateToken, authorizeRoles('parent'), courseController.createCourseForm);
 router.post('/create', authenticateToken, authorizeRoles('parent'), courseController.createCourse);
 
 router.get('/filter',courseController.getFilteredCourses);
 router.get('/search',courseController.SearchCourse);
+
+router.get('/:slug',courseController.showDetail);
 
 router.get('/', courseController.show);
 
