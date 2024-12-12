@@ -6,7 +6,7 @@ class TutorController {
     async show(req, res, next) {
         try {
             const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 2;
+            const limit = parseInt(req.query.limit) || 10;
             const skip = (page - 1) * limit;
 
             const total = await Tutor.countDocuments({ status: 'Đã duyệt' });
@@ -105,6 +105,102 @@ class TutorController {
             res.status(500).json({ message: 'Error retrieving ratings', error });
         }
     }
+
+    async SearchTutors(req, res, next) {
+        try {
+            const keyword = req.query.keyword || '';
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 10;
+            const skip = (page - 1) * limit;
+    
+            const tutors = await Tutor.find({
+                $or: [
+                    { name: { $regex: keyword, $options: 'i' } },
+                    { specialization: { $regex: keyword, $options: 'i' } }
+                ]
+            })
+            .skip(skip)
+            .limit(limit);
+    
+            const totalTutors = await Tutor.countDocuments({
+                $or: [
+                    { name: { $regex: keyword, $options: 'i' } },
+                    { specialization: { $regex: keyword, $options: 'i' } }
+                ]
+            });
+    
+            res.json({
+                data: multipleMongooseToObject(tutors),
+                pagination: {
+                    total: totalTutors,
+                    currentPage: page,
+                    totalPages: Math.ceil(totalTutors / limit),
+                },
+            });
+        } catch (error) {
+            console.error('Error searching tutors:', error);
+            next(error);
+        }
+    }
+    
+
+    // [GET] /filter
+    async getFilteredTutors(req, res, next) {
+        try {
+            const {
+                address: tutorAddress,
+                specialization: tutorSpecialization,
+                status: tutorStatus,
+                ratingMin,
+                ratingMax,
+                page = 1,
+                limit = 10,
+                keyword,
+            } = req.query;
+    
+            const skip = (parseInt(page) - 1) * parseInt(limit);
+            const filters = {};
+    
+            if (keyword) {
+                filters.$or = [
+                    { name: { $regex: keyword, $options: 'i' } },
+                    { specialization: { $regex: keyword, $options: 'i' } },
+                ];
+            }
+            if (tutorAddress) {
+                filters.address = { $in: tutorAddress.split(',') };
+            }
+            if (tutorSpecialization) {
+                filters.specialization = { $in: tutorSpecialization.split(',') };
+            }
+            if (tutorStatus) {
+                filters.status = { $in: tutorStatus.split(',') };
+            }
+            if (ratingMin || ratingMax) {
+                filters.rating = {};
+                if (ratingMin) filters.rating.$gte = parseFloat(ratingMin);
+                if (ratingMax) filters.rating.$lte = parseFloat(ratingMax);
+            }
+    
+            const total = await Tutor.countDocuments(filters);
+            const tutors = await Tutor.find(filters)
+                .skip(skip)
+                .limit(parseInt(limit));
+    
+            res.json({
+                tutors: multipleMongooseToObject(tutors),
+                pagination: {
+                    total,
+                    currentPage: parseInt(page),
+                    totalPages: Math.ceil(total / limit),
+                },
+            });
+        } catch (error) {
+            console.error('Error filtering tutors:', error);
+            res.status(500).json({ message: 'Error filtering tutors', error });
+        }
+    }
+    
     
 }
 

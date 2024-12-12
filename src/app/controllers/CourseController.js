@@ -6,7 +6,7 @@ class CourseController {
     async show(req, res, next) {
         try {
             const page = parseInt(req.query.page) || 1; // Trang hiện tại
-            const limit = parseInt(req.query.limit) || 2; // Số lượng khóa học mỗi trang
+            const limit = parseInt(req.query.limit) || 10; // Số lượng khóa học mỗi trang
             const skip = (page - 1) * limit; // Số lượng bỏ qua để lấy trang hiện tại
     
             // Đếm tổng số khóa học
@@ -91,7 +91,7 @@ class CourseController {
         try {
             const keyword = req.query.keyword || '';
             const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 12;
+            const limit = parseInt(req.query.limit) || 10;
             const skip = (page - 1) * limit;
     
             const courses = await Course.find({
@@ -128,7 +128,7 @@ class CourseController {
                 teachingMode: courseTeachingMode,
                 sexTutor: courseSexTutor,
                 page = 1,
-                limit = 12,
+                limit = 10,
                 keyword,
             } = req.query;
 
