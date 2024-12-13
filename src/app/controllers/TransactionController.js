@@ -1,8 +1,12 @@
 const Transaction = require('../models/Transaction');
 const Tutor = require('../models/Tutor');
 const Course = require('../models/Course');
+const dotenv = require('dotenv');
 const {  checkPaid } = require('../../util/payment');
 
+dotenv.config(); // Load environment variables
+
+require('dotenv').config(); // Load environment variables from .env
 
 class TransactionController {
     
@@ -39,19 +43,19 @@ class TransactionController {
     async createTransaction(req, res, next) {
         try {
             const bankInfo = {
-                id: 'MB',
-                accountNo: '0398103087',
-                accountName: 'HUYNH MAN',
-                template: 'compact',
+                id: process.env.BANK_ID,
+                accountNo: process.env.ACCOUNT_NO,
+                accountName: process.env.ACCOUNT_NAME,
+                template: process.env.TEMPLATE,
             };
     
-            const { amount, paymentMethod } = req.body; // Không cần truyền `description`
+            const {  paymentMethod } = req.body; // Không cần truyền `description`
             const slug = req.params.slug; // Lấy slug của khóa học từ URL
             const tutorId = req.user.id; // ID gia sư từ token
     
-            if (!amount || amount <= 0) {
-                return res.status(400).json({ message: 'Invalid amount' });
-            }
+            // if (!amount || amount <= 0) {
+            //     return res.status(400).json({ message: 'Invalid amount' });
+            // }
     
             // Tìm khóa học
             const course = await Course.findOne({ slug });
@@ -60,11 +64,11 @@ class TransactionController {
             }
     
             const courseId = course._id;
-    
+            const amount=course.fee;
             // Tạo giao dịch mới với description tạm thời
             let newTransaction = new Transaction({
                 tutorId,
-                amount,
+                amount:amount,
                 paymentMethod,
                 courseId,
                 description: 'Temporary description', // Tạm thời
