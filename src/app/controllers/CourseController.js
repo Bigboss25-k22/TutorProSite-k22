@@ -131,7 +131,7 @@ class CourseController {
             const newRegistration = new Registration({
                 userId: tutorId,
                 courseId: courseId,
-                status: 'pending'
+                status: 'Chờ duyệt',
             });
 
             await newRegistration.save();
