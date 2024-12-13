@@ -13,7 +13,7 @@ router.post('/updateInfo',authenticateToken, authorizeRoles('tutor'),tutorContro
 
 
 router.get('/:slug', tutorController.showDetail);
-router.get('/:slug/rating', tutorController.getRatings);
+
 
 
 

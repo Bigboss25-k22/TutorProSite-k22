@@ -1,5 +1,5 @@
 const Parent = require('../models/Parent'); 
-const Rating = require('../models/Rating');
+const Rating = require('../models/Review');
 const Tutor = require('../models/Tutor');
 
 const { mongooseToObject } = require('../../util/mongoose');

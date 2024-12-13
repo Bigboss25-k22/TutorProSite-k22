@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const RatingSchema = new Schema(
+const ReviewSchema = new Schema(
   {
     tutorId: { type: Number, required: true, ref: "Tutor" }, // ID của gia sư
     parentId: { type: Number, required: true, ref: "Parent" }, // ID của phụ huynh
@@ -13,4 +13,4 @@ const RatingSchema = new Schema(
   }
 );
 
-module.exports = mongoose.model("Rating", RatingSchema);
+module.exports = mongoose.model("Review", ReviewSchema);
