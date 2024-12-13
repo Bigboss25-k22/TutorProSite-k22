@@ -58,7 +58,7 @@ class CourseController {
         try {
             const {
                 parent_id, subject, grade, address, salary, sessions, schedule, 
-                studentInfo, requirements, teachingMode, contact, sexTutor
+                studentInfo, requirements, teachingMode, contact, sexTutor,fee
             } = req.body;
     
             const newCourse = new Course({
@@ -75,7 +75,7 @@ class CourseController {
                 teachingMode,
                 contact,
                 sexTutor,
-                slug: subject,
+                fee
             });
     
             await newCourse.save();
