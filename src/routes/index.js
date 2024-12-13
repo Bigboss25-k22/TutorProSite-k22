@@ -8,11 +8,11 @@ const transactionRouter = require('./transaction');
 const reviewRouter = require('./review');
 const messageRouter = require('./message');
 
-
+const { authenticateToken, authorizeRoles } = require('../app/middleware/authmiddleware');
 
 function route(app) {
   app.use('/', authRouter);  
-  app.use('/admin', adminRouter);
+  app.use('/admin', authenticateToken, authorizeRoles('admin'), adminRouter);
   app.use('/users', userRouter);
   app.use('/tutors', tutorRouter);
   app.use('/courses', courseRouter);

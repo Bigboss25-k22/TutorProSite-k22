@@ -1,6 +1,7 @@
 const Tutor = require('../models/Tutor');
 const Course = require('../models/Course');
 const { mongooseToObject } = require('../../util/mongoose');
+const Registration = require('../models/Registration');
 
 class TutorController {
     // [GET] /tutor
@@ -81,6 +82,79 @@ class TutorController {
         }
     }
 
+    // [GET] /course/register
+    async ShowregisterCourse(req, res, next) {
+        try {
+            // Find all registrations and populate userId with Tutor model
+            const registrations = await Registration.find({}).populate('userId', 'name phoneNumber address introduction specialization rating'); 
+
+            console.log(registrations);
+            
+            // Group registrations by courseId
+            const courses = {};
+            registrations.forEach(registration => {
+                const courseId = registration.courseId;
+                if (!courses[courseId]) {
+                    courses[courseId] = {
+                        courseId: courseId,
+                        tutors: []
+                    };
+                }
+                courses[courseId].tutors.push({
+                    tutor: registration.userId,
+                    registeredAt: registration.registeredAt
+                });
+            });
+
+            // Convert courses object to array
+            const coursesArray = Object.values(courses);
+
+            // Return the grouped data
+            res.json(coursesArray.map(course => ({
+                courseId: course.courseId,
+                tutors: course.tutors.map(tutor => ({
+                    tutor: mongooseToObject(tutor.tutor),
+                    registeredAt: tutor.registeredAt
+                }))
+            })));
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // [POST] /course/register
+    async approveRegister(req, res, next) {
+        try {
+            const { registrationId } = req.body;
+    
+            // Approve the selected registration
+            const approvedRegistration = await Registration.findByIdAndUpdate(
+                registrationId,
+                { status: 'approved' },
+                { new: true }
+            );
+    
+            if (!approvedRegistration) {
+                return res.status(404).json({ message: 'Registration not found' });
+            }
+    
+            // Update the course with the approved tutor
+            await Course.findByIdAndUpdate(
+                approvedRegistration.courseId,
+                { tutor_id: approvedRegistration.userId }
+            );
+    
+            // Reject other registrations for the same course
+            await Registration.updateMany(
+                { courseId: approvedRegistration.courseId, _id: { $ne: registrationId } },
+                { status: 'rejected' }
+            );
+    
+            res.status(200).json({ message: 'Registration approved successfully', registration: mongooseToObject(approvedRegistration) });
+        } catch (error) {
+            next(error);
+        }
+    }
 }
 
 module.exports = new TutorController();

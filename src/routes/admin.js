@@ -2,17 +2,17 @@ const express = require('express');
 const router = express.Router();
 
 const AdminController = require('../app/controllers/AdminController'); 
-const { authenticateToken, authorizeRoles } = require('../app/middleware/authmiddleware');
 
+router.get('/course/register', AdminController.ShowregisterCourse);
 
-router.get('/tutor', authenticateToken, authorizeRoles('admin'), AdminController.showTutor);
-router.get('/course', authenticateToken, authorizeRoles('admin'), AdminController.showCourse);
+router.put('/tutor/:id/approve', AdminController.approveTutor);
+router.put('/course/:id/approve', AdminController.approveCourse);
 
-router.get('/tutor/:id', authenticateToken, authorizeRoles('admin'), AdminController.showTutorDetail);
-router.get('/course/:id', authenticateToken, authorizeRoles('admin'), AdminController.showCourseDetail);
+router.get('/tutor/:id', AdminController.showTutorDetail);
+router.get('/course/:id', AdminController.showCourseDetail);
 
-router.put('/tutor/:id/approve', authenticateToken, authorizeRoles('admin'), AdminController.approveTutor);
-router.put('/course/:id/approve', authenticateToken, authorizeRoles('admin'), AdminController.approveCourse);
+router.get('/tutor', AdminController.showTutor);
+router.get('/course', AdminController.showCourse);
 
 module.exports = router;
 
