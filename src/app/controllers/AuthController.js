@@ -169,6 +169,8 @@ class AuthController {
             const { email } = req.body;
             const user = await User.findOne({ email });
 
+            console.log(user); 
+
             if (!user) {
                 return res.status(404).json({ message: 'Email không tồn tại trong hệ thống.' });
             }
