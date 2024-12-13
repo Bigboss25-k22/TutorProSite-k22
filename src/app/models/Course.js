@@ -6,7 +6,7 @@ var slug = require('mongoose-slug-generator');
 mongoose.plugin(slug);
 
 const CourseSchema = new Schema({
-  _id: { type: String },           // ID khóa học
+  _id: { type: Number },           // ID khóa học
   parent_id: { type: Number, required: true },                       // ID phụ huynh
   tutor_id: { type: Number},                        // ID gia sư
   subject: { type: String, required: true },                         // Môn học

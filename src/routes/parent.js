@@ -8,7 +8,6 @@ const { authenticateToken, authorizeRoles } = require('../app/middleware/authmid
 router.get('/updateInfo', authenticateToken, authorizeRoles('parent'),parentController.updateInforForm);
 router.post('/updateInfo',authenticateToken, authorizeRoles('parent'),parentController.updateInfor);
 
-router.post('/rateTutor/:slug', authenticateToken, authorizeRoles('parent'), parentController.submitRating);
 
 
 

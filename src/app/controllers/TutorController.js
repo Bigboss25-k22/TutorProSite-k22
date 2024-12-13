@@ -84,27 +84,7 @@ class TutorController {
     }
     
 
-    async getRatings(req, res, next) {
-        try {
-            const tutorId = req.params.tutorId;
-            const ratings = await Rating.find({ tutorId }).populate("parentId", "name");
-    
-            // Trả về danh sách đánh giá dưới dạng JSON
-            res.status(200).json({
-                message: 'Ratings retrieved successfully',
-                ratings: ratings.map(rating => ({
-                    id: rating._id,
-                    parentName: rating.parentId.name,
-                    ratingValue: rating.rating,
-                    comment: rating.comment,
-                    createdAt: rating.createdAt
-                }))
-            });
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Error retrieving ratings', error });
-        }
-    }
+   
 
     async SearchTutors(req, res, next) {
         try {

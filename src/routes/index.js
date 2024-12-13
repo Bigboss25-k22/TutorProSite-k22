@@ -3,7 +3,10 @@ const authRouter = require('./auth');
 const tutorRouter = require('./tutor');
 const courseRouter = require('./course');
 const adminRouter = require('./admin');
-const parnetRouter = require('./parent');
+const parentRouter = require('./parent');
+const transactionRouter = require('./transaction');
+const reviewRouter = require('./review');
+const messageRouter = require('./message');
 
 
 
@@ -13,7 +16,11 @@ function route(app) {
   app.use('/users', userRouter);
   app.use('/tutors', tutorRouter);
   app.use('/courses', courseRouter);
-  app.use('/parents', parnetRouter);
+  app.use('/parents', parentRouter);
+  app.use('/transactions', transactionRouter);
+  app.use('/reviews', reviewRouter);
+  app.use('/messages', messageRouter);
+
 }
 
 module.exports = route;
