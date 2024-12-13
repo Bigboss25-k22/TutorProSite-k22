@@ -19,6 +19,12 @@ router.get('/search',courseController.SearchCourse);
 
 router.get('/:slug',courseController.showDetail);
 
+// [PUT] /courses/:slug - Cập nhật khóa học
+router.put('/:slug/update',authenticateToken, authorizeRoles('parent'), courseController.updateCourses);
+
+// [DELETE] /courses/:slug - Xóa khóa học
+router.delete('/:slug/delete', authenticateToken, authorizeRoles('parent'),courseController.deleteCourses);
+
 router.get('/', courseController.show);
 
 module.exports = router;
