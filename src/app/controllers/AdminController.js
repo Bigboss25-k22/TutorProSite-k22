@@ -130,7 +130,7 @@ class TutorController {
             // Approve the selected registration
             const approvedRegistration = await Registration.findByIdAndUpdate(
                 registrationId,
-                { status: 'approved' },
+                { status: 'Chờ thanh toán'},
                 { new: true }
             );
     
@@ -147,7 +147,7 @@ class TutorController {
             // Reject other registrations for the same course
             await Registration.updateMany(
                 { courseId: approvedRegistration.courseId, _id: { $ne: registrationId } },
-                { status: 'rejected' }
+                { status: 'Từ chối' }
             );
     
             res.status(200).json({ message: 'Registration approved successfully', registration: mongooseToObject(approvedRegistration) });

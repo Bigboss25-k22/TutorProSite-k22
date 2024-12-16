@@ -13,7 +13,12 @@ router.get('/', authenticateToken,authorizeRoles('tutor'), transactionController
 // Xử lý thanh toán
 router.post('/processPayment', authenticateToken,authorizeRoles('tutor'), transactionController.processPayment);
 
-// Tạo giao dịch mới
+
+
+// Lấy tất cả giao dịch (chỉ dành cho admin)
+router.get('/all', authenticateToken, authorizeRoles('admin'), transactionController.getAllTransactions);
+
+// Tạo giao dịch mới từ slug khóa học
 router.post('/:slug', authenticateToken,authorizeRoles('tutor'), transactionController.createTransaction);
 
 
@@ -21,8 +26,5 @@ router.post('/:slug', authenticateToken,authorizeRoles('tutor'), transactionCont
 
 
 
-
-// Lấy tất cả giao dịch (chỉ dành cho admin)
-router.get('/all', authenticateToken, authorizeRoles('admin'), transactionController.getAllTransactions);
 
 module.exports = router;

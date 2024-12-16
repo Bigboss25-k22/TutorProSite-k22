@@ -20,6 +20,7 @@ const CourseSchema = new Schema({
   teachingMode: { type: String, required: true },                  // Hình thức (offline/online)
   contact: { type: String, required: true },                        // Liên hệ
   sexTutor: { type: String, required: true },    
+  fee:{type :Number,require:true},
   status: {
     type: String,
     default: 'Chưa duyệt'

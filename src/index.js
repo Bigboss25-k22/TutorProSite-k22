@@ -9,7 +9,7 @@ const db = require('./config/db');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3001;
+const port = process.env.PORT || 3000;
 
 // Kết hợp HTTP server với Express
 const server = http.createServer(app);
