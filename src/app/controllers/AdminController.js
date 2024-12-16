@@ -28,6 +28,36 @@ class TutorController {
         }
     }
 
+    // [PUT] /tutors/:id
+    async updateTutor(req, res, next) {
+        try {
+            const tutor = await Tutor.findByIdAndUpdate(req.params.id, req.body, { new: true });
+            if (!tutor) {
+                return res.status(404).json({ message: 'Gia sư không tồn tại' });
+            }
+            res.json({ tutor: mongooseToObject(tutor) });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // [DELETE] /tutors/:id
+    async deleteTutor(req, res, next) {
+        try {
+            const tutor = await Tutor.findByIdAndDelete(req.params.id);
+            if (!tutor) {
+                return res.status(404).json({ message: 'Gia sư không tồn tại' });
+            }
+
+            // Delete the associated User
+            await User.findByIdAndDelete(tutor.user_id);
+
+            res.json({ message: 'Gia sư và tài khoản người dùng đã được xóa' });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     // [GET] /courses
     async showCourse(req, res, next) {
         try {
@@ -43,6 +73,32 @@ class TutorController {
         try {
             const course = await Course.findById(req.params.id);
             res.json({ course: mongooseToObject(course) });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // [PUT] /courses/:id
+    async updateCourse(req, res, next) {
+        try {
+            const course = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+            if (!course) {
+                return res.status(404).json({ message: 'Khóa học không tồn tại' });
+            }
+            res.json({ course: mongooseToObject(course) });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // [DELETE] /courses/:id
+    async deleteCourse(req, res, next) {
+        try {
+            const course = await Course.findByIdAndDelete(req.params.id);
+            if (!course) {
+                return res.status(404).json({ message: 'Khóa học không tồn tại' });
+            }
+            res.json({ message: 'Khóa học đã được xóa' });
         } catch (error) {
             next(error);
         }
@@ -86,10 +142,8 @@ class TutorController {
     async ShowregisterCourse(req, res, next) {
         try {
             // Find all registrations and populate userId with Tutor model
-            const registrations = await Registration.find({}).populate('userId', 'name phoneNumber address introduction specialization rating'); 
+            const registrations = await Registration.find({}).populate('userId', 'name email'); // Assuming 'name' and 'email' are fields in Tutor model
 
-            console.log(registrations);
-            
             // Group registrations by courseId
             const courses = {};
             registrations.forEach(registration => {
@@ -155,6 +209,7 @@ class TutorController {
             next(error);
         }
     }
+
 }
 
 module.exports = new TutorController();
