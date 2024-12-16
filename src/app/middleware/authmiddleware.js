@@ -1,3 +1,4 @@
+// authmiddleware.js
 const jwt = require('jsonwebtoken');
 const config = require('../../config/auth.config'); // Adjust the path as necessary
 

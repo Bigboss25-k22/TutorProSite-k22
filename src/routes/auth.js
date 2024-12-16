@@ -5,9 +5,9 @@ const { authenticateToken, authorizeRoles } = require('../app/middleware/authmid
 
 
 router.get('/', authController.home);
-//router.get('/login', authController.loginForm);
+router.get('/login', authController.loginForm);
 router.post('/login', authController.login);
-//router.get('/register', authController.registerForm);
+router.get('/register', authController.registerForm);
 router.post('/register', authController.register);
 
 // Route GET để hiển thị form thay đổi mật khẩu
