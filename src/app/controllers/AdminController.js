@@ -4,7 +4,58 @@ const User = require('../models/user');
 const { mongooseToObject } = require('../../util/mongoose');
 const Registration = require('../models/Registration');
 
-class TutorController {
+class AdminController {
+
+    // [GET] /parents
+    async showParent(req, res, next) {
+        try {
+            const parents = await Parent.find({});
+            res.json({ parents: parents.map(parent => mongooseToObject(parent)) });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // [GET] /parents/:id
+    async showParentDetail(req, res, next) {
+        try {
+            const parent = await Parent.findById(req.params.id);
+            res.json({ parent: mongooseToObject(parent) });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // [PUT] /parents/:id
+    async updateParent(req, res, next) {
+        try {
+            const parent = await Parent.findByIdAndUpdate(req.params.id, req.body, { new: true });
+            if (!parent) {
+                return res.status(404).json({ message: 'Phụ huynh không tồn tại' });
+            }
+            res.json({ parent: mongooseToObject(parent) });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    // [DELETE] /parents/:id
+    async deleteParent(req, res, next) {
+        try {
+            const parent = await Parent.findByIdAndDelete(req.params.id);
+            if (!parent) {
+                return res.status(404).json({ message: 'Phụ huynh không tồn tại' });
+            }
+
+            // Delete the associated User
+            await User.findByIdAndDelete(parent.user_id);
+
+            res.json({ message: 'Phụ huynh và tài khoản người dùng đã được xóa' });
+        } catch (error) {
+            next(error);
+        }
+    }
+
     // [GET] /tutor
     async showTutor(req, res, next) {
         try {
@@ -213,4 +264,4 @@ class TutorController {
 
 }
 
-module.exports = new TutorController();
+module.exports = new AdminController();
