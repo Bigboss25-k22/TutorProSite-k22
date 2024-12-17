@@ -1,9 +1,12 @@
 const mongoose = require("mongoose");
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 
 const Schema = mongoose.Schema;
 var slug = require('mongoose-slug-generator');
 
 mongoose.plugin(slug);
+const slugify = require("slugify");
+
 
 const CourseSchema = new Schema({
   _id: { type: Number },           // ID khóa học
@@ -25,20 +28,30 @@ const CourseSchema = new Schema({
     type: String,
     default: 'Chưa duyệt'
   },
-  slug: { type: String, slug: "subject" ,unique:true},
+  slug: { type: String ,unique:true},
 }, {
   //_id: false,
   timestamps: true, // Tự động thêm createdAt và updatedAt
 });
 
 // Pre-save hook to generate custom _id
-CourseSchema.pre('save', async function(next) {
-  if (this.isNew) {
-    const lastCourse = await mongoose.model('Course').findOne().sort({ _id: -1 });
-    const lastId = lastCourse ? parseInt(lastCourse._id.replace('LH', '')) : 0;
-    this._id = `LH${lastId + 1}`;
+
+CourseSchema.plugin(AutoIncrement, { id: 'course_seq', inc_field: '_id' });
+
+CourseSchema.pre("save", async function (next) {
+  if (this.isNew || this.isModified("subject")) {
+    const baseSlug = slugify(this.subject, { lower: true });
+    let slug = baseSlug;
+    let counter = 1;
+
+    // Kiểm tra trùng lặp slug
+    while (await mongoose.models.Tutor.exists({ slug })) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    this.slug = slug;
   }
   next();
 });
-
 module.exports = mongoose.model('Course', CourseSchema);
