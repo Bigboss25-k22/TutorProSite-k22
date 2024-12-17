@@ -1,6 +1,5 @@
 const Tutor = require('../models/Tutor'); 
 const { mongooseToObject } = require('../../util/mongoose');
-const { render } = require('node-sass');
 
 class TutorController {
     async show(req, res, next) {

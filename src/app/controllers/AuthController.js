@@ -24,25 +24,35 @@ class AuthController {
     async login(req, res, next) {
         try {
             const { email, password } = req.body; 
-            console.log(email);
-            console.log(password);
             const user = await User.findOne({ email }); 
-            console.log(user);
             
-    
             if (user && await bcrypt.compare(password, user.password)) { 
+                let name = '';
+
+                // Fetch the name based on the user's role
+                if (user.role === 'tutor') {
+                    const tutor = await Tutor.findOne({ user_id: user._id });
+                    if (tutor) {
+                        name = tutor.name;
+                    }
+                } else if (user.role === 'parent') {
+                    const parent = await Parent.findOne({ user_id: user._id });
+                    if (parent) {
+                        name = parent.name;
+                    }
+                }
+
                 // Generate a token
                 const token = jwt.sign(
-                    { id: user._id, role: user.role }, 
+                    { id: user._id, name: name }, 
                     key.secret, 
                     { expiresIn: '1h' } 
                 );
                 
                 user.password = undefined; 
-    
+
                 res.status(200).json({ 
                     message: "Đăng nhập thành công!",
-                    user,
                     token
                 });
             } else {
