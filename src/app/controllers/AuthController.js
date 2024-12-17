@@ -73,7 +73,7 @@ class AuthController {
     async register(req, res, next) {
         try {
 
-            const { name, email, password, phoneNumber, address, role, introduction, specialization } = req.body;
+            const { name, email, password, phoneNumber, address, role, introduction, specialization,sex } = req.body;
 
 
             const saltRounds = 10;
@@ -116,6 +116,7 @@ class AuthController {
                     introduction: req.body.introduction || '', 
                     specialization: req.body.specialization || '', 
                     rating: 0, 
+                    sex,
                 });
                 await tutor.save(); 
 

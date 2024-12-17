@@ -1,6 +1,7 @@
 const Course = require('../models/Course');
 const { mongooseToObject,multipleMongooseToObject } = require('../../util/mongoose');
 const Registration = require('../models/Registration');
+const user = require('../models/user');
 
 class CourseController {
     // [GET] /courses
@@ -57,12 +58,12 @@ class CourseController {
     async createCourse(req, res, next) {
         try {
             const {
-                parent_id, subject, grade, address, salary, sessions, schedule, 
+                 subject, grade, address, salary, sessions, schedule, 
                 studentInfo, requirements, teachingMode, contact, sexTutor,fee
             } = req.body;
     
             const newCourse = new Course({
-                parent_id, 
+                parent_id:req.user.id, 
                 tutor_id: null,
                 subject,
                 grade,
