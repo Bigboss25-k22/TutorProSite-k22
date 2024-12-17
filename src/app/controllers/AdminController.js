@@ -1,5 +1,6 @@
 const Tutor = require('../models/Tutor');
 const Course = require('../models/Course');
+const User = require('../models/user');
 const { mongooseToObject } = require('../../util/mongoose');
 const Registration = require('../models/Registration');
 
