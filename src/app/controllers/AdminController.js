@@ -4,6 +4,8 @@ const User = require('../models/user');
 const { mongooseToObject } = require('../../util/mongoose');
 const Registration = require('../models/Registration');
 
+const { sendApprovalEmail } = require('../services/emailService');
+
 class AdminController {
 
     // [GET] /parents
@@ -232,30 +234,46 @@ class AdminController {
     async approveRegister(req, res, next) {
         try {
             const { registrationId } = req.body;
-    
+        
             // Approve the selected registration
             const approvedRegistration = await Registration.findByIdAndUpdate(
                 registrationId,
-                { status: 'Chờ thanh toán'},
+                { status: 'Chờ thanh toán' },
                 { new: true }
             );
-    
+        
             if (!approvedRegistration) {
                 return res.status(404).json({ message: 'Registration not found' });
             }
-    
+        
             // Update the course with the approved tutor
             await Course.findByIdAndUpdate(
                 approvedRegistration.courseId,
                 { tutor_id: approvedRegistration.userId }
             );
-    
+        
             // Reject other registrations for the same course
             await Registration.updateMany(
                 { courseId: approvedRegistration.courseId, _id: { $ne: registrationId } },
                 { status: 'Từ chối' }
             );
-    
+        
+            // Send approval email
+            const user = await User.findById(approvedRegistration.userId);
+            const course = await Course.findById(approvedRegistration.courseId);
+            const courseDetails = {
+                subject: course.subject,
+                grade: course.grade,
+                salary: course.salary,
+                sessions: course.sessions,
+                schedule: course.schedule,
+                teachingMode: course.teachingMode,
+                requirements: course.requirements,
+                sexTutor: course.sexTutor,
+                fee: course.fee
+            };
+            await sendApprovalEmail(user.email, courseDetails);
+        
             res.status(200).json({ message: 'Registration approved successfully', registration: mongooseToObject(approvedRegistration) });
         } catch (error) {
             next(error);
