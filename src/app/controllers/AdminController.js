@@ -1,8 +1,11 @@
 const Tutor = require('../models/Tutor');
 const Course = require('../models/Course');
 const User = require('../models/user');
-const { mongooseToObject } = require('../../util/mongoose');
+const Parent = require('../models/Parent');
 const Registration = require('../models/Registration');
+
+const { mongooseToObject } = require('../../util/mongoose');
+
 
 const { sendApprovalEmail } = require('../services/emailService');
 

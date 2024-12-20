@@ -72,59 +72,59 @@ class AuthController {
     // [POST] /register
     async register(req, res, next) {
         try {
-
-            const { name, email, password, phoneNumber, address, role, introduction, specialization,sex } = req.body;
-
-
+            const { name, email, password, phoneNumber, address, role, introduction, specialization, sex } = req.body;
+    
+            // Check if the email already exists
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                return res.status(400).json({ message: 'Email đã được sử dụng.' }); // "Email is already in use."
+            }
+    
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-
-            // Tạo User và lưu vào bảng User
+    
+            // Create User and save to User collection
             const user = new User({
-                password:hashedPassword,
+                name,
+                password: hashedPassword,
                 email,
                 role,
-
+                address,
+                phoneNumber,
             });
-      
-               
-  
+    
             await user.save();
-
-            // Nếu là phụ huynh, lưu thêm vào bảng Parent
+    
+            // If role is 'parent', save to Parent collection
             if (role === 'parent') {
                 const parent = new Parent({
-                    _id:user._id,
+                    _id: user._id,
                     name,
                     address,
                     phoneNumber,
-                  
-
                 });
                 await parent.save();
             }
-
-            // Nếu là gia sư, lưu thêm vào bảng Tutor
+    
+            // If role is 'tutor', save to Tutor collection
             if (role === 'tutor') {
-              
                 const tutor = new Tutor({
-                    _id:user._id,
+                    _id: user._id,
                     name,
                     address,
                     phoneNumber,
-                    introduction: req.body.introduction || '', 
-                    specialization: req.body.specialization || '', 
-                    rating: 0, 
+                    introduction: introduction || '',
+                    specialization: specialization || '',
+                    rating: 0,
                     sex,
                 });
-                await tutor.save(); 
-
+                await tutor.save();
             }
-
-            res.redirect('/login'); // Chuyển hướng về trang đăng nhập
+    
+            res.status(201).json({ message: 'Đăng ký thành công.' }); // "Registration successful."
         } catch (error) {
-            next(error);
+            console.error('Register error:', error);
+            res.status(500).json({ message: 'Lỗi máy chủ nội bộ.' }); // "Internal server error."
         }
     }
 
