@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách gia sư</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Danh Sách Gia Sư</h1>
+            
+        <!-- Thanh tìm kiếm -->
+        <div class="search-bar">
+            <input type="text" id="search_input" placeholder="Tìm kiếm gia sư...">
+            <button id="search_button">Tìm Kiếm</button>
+        </div>
+
+        <!-- Bộ lọc -->
+        <div class="filters">
+            <label>Địa chỉ:
+                <select id="filter_address">
+                    <option value="">Tất cả</option>
+                    <option value="Hà Nội">Hà Nội</option>
+                    <option value="Hồ Chí Minh">Hồ Chí Minh</option>
+                </select>
+            </label>
+
+            <label>Chuyên ngành:
+                <select id="filter_specialization">
+                    <option value="">Tất cả</option>
+                    <option value="Toán">Toán</option>
+                    <option value="Lý">Lý</option>
+                </select>
+            </label>
+        </div>
+
+        <!-- Danh sách gia sư -->
+        <div id="tutor-list" class="row"></div>
+
+        <!-- Phân trang -->
+        <div id="pagination" class="pagination"></div>
+    </div>
+
+    <script src="/js/tutors.js"></script>
+</body>
+</html>

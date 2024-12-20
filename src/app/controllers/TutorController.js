@@ -1,5 +1,6 @@
 const Tutor = require('../models/Tutor'); 
 const { mongooseToObject } = require('../../util/mongoose');
+const { multipleMongooseToObject } = require('../../util/mongoose');
 
 class TutorController {
     async show(req, res, next) {
@@ -19,6 +20,11 @@ class TutorController {
                 data: tutors.map(tutor => mongooseToObject(tutor)),
                 pagination: { total, currentPage: page, totalPages, limit },
             });
+
+            // res.render('Tutor/tutors',({
+            //     data: tutors.map(tutor => mongooseToObject(tutor)),
+            //     pagination: { total, currentPage: page, totalPages, limit },
+            // }));
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error fetching tutors', error });
@@ -127,6 +133,7 @@ class TutorController {
     async getFilteredTutors(req, res, next) {
         try {
             const {
+                sex:tutorsex,
                 address: tutorAddress,
                 specialization: tutorSpecialization,
                 status: tutorStatus,
@@ -148,6 +155,9 @@ class TutorController {
             }
             if (tutorAddress) {
                 filters.address = { $in: tutorAddress.split(',') };
+            }
+            if (tutorsex) {
+                filters.sex = { $in: tutorsex.split(',') };
             }
             if (tutorSpecialization) {
                 filters.specialization = { $in: tutorSpecialization.split(',') };
