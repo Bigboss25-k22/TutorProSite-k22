@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);
+    let isInitialLoad = true; // Đánh dấu lần đầu load trang
+
     let filters = {
         keyword: urlParams.get('keyword') || '',
         subject: urlParams.get('subject')?.split(',') || [],
@@ -7,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
         teachingMode: urlParams.get('teachingMode')?.split(',') || [],
         sexTutor: urlParams.get('sexTutor')?.split(',') || [],
         page: parseInt(urlParams.get('page')) || 1,
-        limit: parseInt(urlParams.get('limit')) || 2,
+        limit: parseInt(urlParams.get('limit')) || 10,
     };
 
     const searchInput = document.getElementById('search_input');
@@ -19,6 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Apply filters and fetch data
     function applyFilters() {
+        if (isInitialLoad) { 
+            isInitialLoad = false; // Sau lần đầu load
+            return; 
+        }
+
         const query = new URLSearchParams({
             ...filters,
             subject: filters.subject.join(','),
@@ -30,8 +37,8 @@ document.addEventListener('DOMContentLoaded', () => {
         fetchCourses();
     }
 
-     // Change page
-     function changePage(page) {
+    // Change page
+    function changePage(page) {
         console.log(`Chuyển sang trang ${page}`);
         filters.page = page;
         applyFilters();
@@ -40,7 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Fetch courses
     function fetchCourses() {
-       
         const query = new URLSearchParams({
             ...filters,
             subject: filters.subject.join(','),
@@ -62,7 +68,7 @@ document.addEventListener('DOMContentLoaded', () => {
         courseList.innerHTML = '';
         courses.forEach((course) => {
             courseList.innerHTML += `
-                            <div class="col-lg-4 col-md-6">
+                <div class="col-lg-4 col-md-6">
                     <div class="single-course">
                         <a href="/course/course-details/${course.slug}">
                             <!-- Nội dung bên trong thẻ này, nếu cần -->
@@ -87,7 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     </div>
                 </div>
-                `;
+            `;
         });
     }
 
@@ -98,14 +104,14 @@ document.addEventListener('DOMContentLoaded', () => {
             paginationContainer.innerHTML += `<a href="#" onclick="changePage(${currentPage - 1})">Previous</a>`;
         }
         for (let i = 1; i <= totalPages; i++) {
-            paginationContainer.innerHTML += `<a href="#" onclick="changePage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</a>`;
+            paginationContainer.innerHTML += `
+                <a href="#" onclick="changePage(${i})" class="${i === currentPage ? 'active' : ''}">${i}</a>
+            `;
         }
         if (currentPage < totalPages) {
             paginationContainer.innerHTML += `<a href="#" onclick="changePage(${currentPage + 1})">Next</a>`;
         }
     }
-
-   
 
     // Handle search
     searchInput.addEventListener('input', () => {
@@ -120,7 +126,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const filterName = checkbox.name;
             const isChecked = checkbox.checked;
 
-            if (isChecked) {
+            if (isChecked && !filters[filterName].includes(checkbox.value)) {
                 filters[filterName].push(checkbox.value);
             } else {
                 filters[filterName] = filters[filterName].filter((val) => val !== checkbox.value);
@@ -131,6 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Initial fetch
+    // Initial fetch (load dữ liệu ban đầu)
     fetchCourses();
 });
