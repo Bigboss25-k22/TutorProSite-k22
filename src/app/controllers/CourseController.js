@@ -4,37 +4,7 @@ const Registration = require('../models/Registration');
 const user = require('../models/user');
 
 class CourseController {
-    // [GET] /courses
-    // async show(req, res, next) {
-    //     try {
-    //         const page = parseInt(req.query.page) || 1; // Trang hiện tại
-    //         const limit = parseInt(req.query.limit) || 10; // Số lượng khóa học mỗi trang
-    //         const skip = (page - 1) * limit; // Số lượng bỏ qua để lấy trang hiện tại
-    
-    //         // Đếm tổng số khóa học
-    //         const total = await Course.countDocuments({ status: 'Đã duyệt' });
-    
-    //         // Lấy danh sách khóa học với phân trang
-    //         const courses = await Course.find({ status: 'Đã duyệt' })
-    //             .skip(skip)
-    //             .limit(limit);
-    
-    //         // Tính tổng số trang
-    //         const totalPages = Math.ceil(total / limit);
-    
-    //         // Trả về danh sách khóa học và thông tin phân trang
-    //         res.json({
-    //             courses: multipleMongooseToObject(courses), // Chuyển đổi dữ liệu Mongoose Object
-    //             pagination: {
-    //                 currentPage: page,
-    //                 totalPages,
-    //                 total,
-    //             },
-    //         });
-    //     } catch (error) {
-    //         next(error); // Xử lý lỗi
-    //     }
-    // }
+   
     
     // [GET] /courses
 async show(req, res, next) {
@@ -75,6 +45,7 @@ async show(req, res, next) {
         
         res.json( {
             courses: multipleMongooseToObject(courses),
+            total,
             currentPage: parseInt(page),
             totalPages: Math.ceil(total / limit),
             keyword,
@@ -225,10 +196,10 @@ async SearchCourse(req, res, next) {
 }
 
    // [GET] /filter
-async getFilteredCourses(req, res, next) {
+   async getFilteredCourses(req, res, next) {
     try {
         const {
-            keyword = '',
+            keyword ,
             subject,
             grade,
             address,
@@ -259,7 +230,8 @@ async getFilteredCourses(req, res, next) {
 
         // Lấy dữ liệu và tổng số khóa học
         const [courses, total] = await Promise.all([
-            Course.find(filters).skip(skip).limit(limitNumber),
+            Course.find( {...filters,
+                status: 'Đã duyệt',}).skip(skip).limit(limitNumber),
             Course.countDocuments(filters),
         ]);
 

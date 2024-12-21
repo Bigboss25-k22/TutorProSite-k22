@@ -133,10 +133,10 @@ class TutorController {
     async getFilteredTutors(req, res, next) {
         try {
             const {
-                sex:tutorsex,
-                address: tutorAddress,
-                specialization: tutorSpecialization,
-                status: tutorStatus,
+                sex,
+                address,
+                specialization,
+                status,
                 ratingMin,
                 ratingMax,
                 page = 1,
@@ -153,17 +153,17 @@ class TutorController {
                     { specialization: { $regex: keyword, $options: 'i' } },
                 ];
             }
-            if (tutorAddress) {
-                filters.address = { $in: tutorAddress.split(',') };
+            if (address) {
+                filters.address = { $in: address.split(',') };
             }
-            if (tutorsex) {
-                filters.sex = { $in: tutorsex.split(',') };
+            if (sex) {
+                filters.sex = { $in: sex.split(',') };
             }
-            if (tutorSpecialization) {
-                filters.specialization = { $in: tutorSpecialization.split(',') };
+            if (specialization) {
+                filters.specialization = { $in: specialization.split(',') };
             }
-            if (tutorStatus) {
-                filters.status = { $in: tutorStatus.split(',') };
+            if (status) {
+                filters.status = { $in: status.split(',') };
             }
             if (ratingMin || ratingMax) {
                 filters.rating = {};
@@ -172,7 +172,10 @@ class TutorController {
             }
     
             const total = await Tutor.countDocuments(filters);
-            const tutors = await Tutor.find(filters)
+            const tutors = await Tutor.find({
+                ...filters,
+                status: 'Đã duyệt', // Chỉ lấy các gia sư đã được duyệt
+            })
                 .skip(skip)
                 .limit(parseInt(limit));
     
