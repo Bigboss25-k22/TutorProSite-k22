@@ -10,6 +10,8 @@ router.get('/', tutorController.show);
 //Detail tutor
 router.get('/updateInfo', authenticateToken, authorizeRoles('tutor'),tutorController.updateInforForm);
 router.post('/updateInfo',authenticateToken, authorizeRoles('tutor'),tutorController.updateInfor);
+router.get('/search', tutorController.SearchTutors);
+router.get('/filter', tutorController.getFilteredTutors);
 
 
 router.get('/:slug', tutorController.showDetail);
