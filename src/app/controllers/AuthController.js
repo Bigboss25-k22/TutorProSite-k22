@@ -25,18 +25,20 @@ class AuthController {
         try {
             const { email, password } = req.body; 
             const user = await User.findOne({ email }); 
+
+            console.log(user);
             
             if (user && await bcrypt.compare(password, user.password)) { 
                 let name = '';
 
                 // Fetch the name based on the user's role
                 if (user.role === 'tutor') {
-                    const tutor = await Tutor.findOne({ user_id: user._id });
+                    const tutor = await Tutor.findOne({ _id: user._id });
                     if (tutor) {
                         name = tutor.name;
                     }
                 } else if (user.role === 'parent') {
-                    const parent = await Parent.findOne({ user_id: user._id });
+                    const parent = await Parent.findOne({ _id: user._id });
                     if (parent) {
                         name = parent.name;
                     }
@@ -53,7 +55,8 @@ class AuthController {
 
                 res.status(200).json({ 
                     message: "Đăng nhập thành công!",
-                    token
+                    token,
+                    name,
                 });
             } else {
                 res.status(401).json({ error: 'Invalid email or password' }); 
@@ -199,7 +202,7 @@ class AuthController {
             await sendResetCodeEmail(email, resetToken);
 
             res.status(200).json({ 
-                message: 'Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra và nhập mã để đặt lại mật khẩu.'
+                message: 'Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra.'
             });
         } catch (error) {
             console.error('Lỗi khi gửi yêu cầu đặt lại mật khẩu:', error);
@@ -214,9 +217,50 @@ class AuthController {
      * Đặt lại mật khẩu dựa trên mã xác thực
      * Body: { email, resetToken, newPassword }
      */
-    async resetPassword(req, res, next) {
+    async verifyResetToken(req, res, next) {
         try {
-            const { email, resetToken, newPassword } = req.body;
+            const { email, resetToken } = req.body;
+    
+            // Tìm người dùng dựa trên email
+            const user = await User.findOne({ email });
+    
+            if (!user) {
+                return res.status(404).json({ 
+                    message: 'Không tìm thấy người dùng với email này.'
+                });
+            }
+    
+            // Tìm mã xác thực hợp lệ
+            const tokenDoc = await ResetToken.findOne({ 
+                userId: user._id, 
+                token: resetToken 
+            });
+    
+            if (!tokenDoc) {
+                return res.status(400).json({ 
+                    message: 'Mã xác thực không hợp lệ hoặc đã hết hạn.'
+                });
+            }
+    
+            res.status(200).json({ 
+                message: 'Mã xác thực hợp lệ.'
+            });
+        } catch (error) {
+            console.error('Lỗi khi kiểm tra mã xác thực:', error);
+            res.status(500).json({ 
+                message: 'Đã xảy ra lỗi khi kiểm tra mã xác thực.'
+            });
+        }
+    }
+    
+    /**
+     * [POST] /verify-reset-token
+     * Kiểm tra mã xác thực
+     * Body: { email, resetToken }
+     */
+    async verifyResetToken(req, res, next) {
+        try {
+            const { email, resetToken } = req.body;
 
             // Tìm người dùng dựa trên email
             const user = await User.findOne({ email });
@@ -239,13 +283,42 @@ class AuthController {
                 });
             }
 
+            res.status(200).json({ 
+                message: 'Mã xác thực hợp lệ.'
+            });
+        } catch (error) {
+            console.error('Lỗi khi kiểm tra mã xác thực:', error);
+            res.status(500).json({ 
+                message: 'Đã xảy ra lỗi khi kiểm tra mã xác thực.'
+            });
+        }
+    }
+
+    /**
+     * [POST] /reset-password
+     * Đặt lại mật khẩu dựa trên mã xác thực
+     * Body: { email, newPassword }
+     */
+    async resetPassword(req, res, next) {
+        try {
+            const { email, newPassword } = req.body;
+
+            // Tìm người dùng dựa trên email
+            const user = await User.findOne({ email });
+
+            if (!user) {
+                return res.status(404).json({ 
+                    message: 'Không tìm thấy người dùng với email này.'
+                });
+            }
+
             // Hash mật khẩu mới
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(newPassword, salt);
             await user.save();
 
             // Xóa token đã sử dụng
-            await ResetToken.deleteOne({ _id: tokenDoc._id });
+            await ResetToken.deleteMany({ userId: user._id });
 
             res.status(200).json({ 
                 message: 'Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập với mật khẩu mới.'
@@ -256,7 +329,8 @@ class AuthController {
                 message: 'Đã xảy ra lỗi khi đặt lại mật khẩu.'
             });
         }
-    }   
+    }
+
 
 
 }
