@@ -169,9 +169,61 @@ class AuthController {
         }
     }
 
-    
+    // [GET] /profile
+    async profile(req, res, next) {
+        try {
+            const userId = req.user.id;
 
-        // Các phương thức hiện tại của AuthController...
+            // Fetch user from User model to get email and role
+            const user = await User.findById(userId).select('email role');
+
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+
+            const userRole = user.role;
+
+            let userInfo = {};
+
+            // Fetch user details based on role
+            if (userRole === 'tutor') {
+                const tutor = await Tutor.findById(userId).select('name sex address phoneNumber dob');
+                if (tutor) {
+                    userInfo = {
+                        "Họ và Tên": tutor.name,
+                        "Vai trò": userRole,
+                        "Ngày sinh": tutor.dob,
+                        "Số điện thoại": tutor.phoneNumber,
+                        "Email": user.email,
+                        "Địa chỉ": tutor.address
+                    };
+                } else {
+                    return res.status(404).json({ message: 'Tutor profile not found.' });
+                }
+            } else if (userRole === 'parent') {
+                const parent = await Parent.findById(userId).select('name address phoneNumber dob');
+                if (parent) {
+                    userInfo = {
+                        "Họ và Tên": parent.name,
+                        "Vai trò": userRole,
+                        "Ngày sinh": parent.dob,
+                        "Số điện thoại": parent.phoneNumber,
+                        "Email": user.email,
+                        "Địa chỉ": parent.address
+                    };
+                } else {
+                    return res.status(404).json({ message: 'Parent profile not found.' });
+                }
+            } else {
+                return res.status(400).json({ message: 'Role không hợp lệ.' });
+            }
+
+            res.status(200).json(userInfo);
+        } catch (error) {
+            console.error('Error fetching profile:', error);
+            res.status(500).json({ message: 'Lỗi máy chủ nội bộ.' });
+        }
+    }
 
 
     // [POST] /forgot-password
