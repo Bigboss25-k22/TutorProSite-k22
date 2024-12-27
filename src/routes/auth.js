@@ -15,6 +15,9 @@ router.post('/updatepassword', authenticateToken,  authController.updatePassword
 // Route để gửi yêu cầu quên mật khẩu
 router.post('/forgot-password', authController.forgotPassword);
 
+// Route để xác minh mã xác thực và hiển thị form đặt lại mật khẩu
+router.post('/verify-Reset/', authController.verifyResetToken);
+
 // Route để đặt lại mật khẩu dựa trên mã xác thực
 router.post('/reset-password', authController.resetPassword);
 

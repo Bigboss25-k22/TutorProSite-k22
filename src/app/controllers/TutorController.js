@@ -1,5 +1,6 @@
 const Tutor = require('../models/Tutor'); 
 const { mongooseToObject } = require('../../util/mongoose');
+const { multipleMongooseToObject } = require('../../util/mongoose');
 
 class TutorController {
     async show(req, res, next) {
@@ -19,6 +20,11 @@ class TutorController {
                 data: tutors.map(tutor => mongooseToObject(tutor)),
                 pagination: { total, currentPage: page, totalPages, limit },
             });
+
+            // res.render('Tutor/tutors',({
+            //     data: tutors.map(tutor => mongooseToObject(tutor)),
+            //     pagination: { total, currentPage: page, totalPages, limit },
+            // }));
         } catch (error) {
             console.error(error);
             res.status(500).json({ message: 'Error fetching tutors', error });
@@ -127,9 +133,10 @@ class TutorController {
     async getFilteredTutors(req, res, next) {
         try {
             const {
-                address: tutorAddress,
-                specialization: tutorSpecialization,
-                status: tutorStatus,
+                sex,
+                address,
+                specialization,
+                status,
                 ratingMin,
                 ratingMax,
                 page = 1,
@@ -146,14 +153,17 @@ class TutorController {
                     { specialization: { $regex: keyword, $options: 'i' } },
                 ];
             }
-            if (tutorAddress) {
-                filters.address = { $in: tutorAddress.split(',') };
+            if (address) {
+                filters.address = { $in: address.split(',') };
             }
-            if (tutorSpecialization) {
-                filters.specialization = { $in: tutorSpecialization.split(',') };
+            if (sex) {
+                filters.sex = { $in: sex.split(',') };
             }
-            if (tutorStatus) {
-                filters.status = { $in: tutorStatus.split(',') };
+            if (specialization) {
+                filters.specialization = { $in: specialization.split(',') };
+            }
+            if (status) {
+                filters.status = { $in: status.split(',') };
             }
             if (ratingMin || ratingMax) {
                 filters.rating = {};
@@ -162,7 +172,10 @@ class TutorController {
             }
     
             const total = await Tutor.countDocuments(filters);
-            const tutors = await Tutor.find(filters)
+            const tutors = await Tutor.find({
+                ...filters,
+                status: 'Đã duyệt', // Chỉ lấy các gia sư đã được duyệt
+            })
                 .skip(skip)
                 .limit(parseInt(limit));
     

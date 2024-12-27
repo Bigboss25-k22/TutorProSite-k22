@@ -4,38 +4,62 @@ const Registration = require('../models/Registration');
 const user = require('../models/user');
 
 class CourseController {
+   
+    
     // [GET] /courses
-    async show(req, res, next) {
-        try {
-            const page = parseInt(req.query.page) || 1; // Trang hiện tại
-            const limit = parseInt(req.query.limit) || 10; // Số lượng khóa học mỗi trang
-            const skip = (page - 1) * limit; // Số lượng bỏ qua để lấy trang hiện tại
-    
-            // Đếm tổng số khóa học
-            const total = await Course.countDocuments({ status: 'Đã duyệt' });
-    
-            // Lấy danh sách khóa học với phân trang
-            const courses = await Course.find({ status: 'Đã duyệt' })
-                .skip(skip)
-                .limit(limit);
-    
-            // Tính tổng số trang
-            const totalPages = Math.ceil(total / limit);
-    
-            // Trả về danh sách khóa học và thông tin phân trang
-            res.json({
-                courses: multipleMongooseToObject(courses), // Chuyển đổi dữ liệu Mongoose Object
-                pagination: {
-                    currentPage: page,
-                    totalPages,
-                    total,
-                },
-            });
-        } catch (error) {
-            next(error); // Xử lý lỗi
+async show(req, res, next) {
+    try {
+        const {
+            page = 1,
+            limit = 10,
+            keyword,
+            subject,
+            grade,
+            teachingMode,
+            sexTutor,
+        } = req.query;
+
+        const filters = { status: 'Đã duyệt' };
+
+        // Thêm tìm kiếm theo từ khóa
+        if (keyword) {
+            filters.$or = [
+                { subject: { $regex: keyword, $options: 'i' } },
+                { grade: { $regex: keyword, $options: 'i' } },
+                { teachingMode: { $regex: keyword, $options: 'i' } },
+                { sexTutor: { $regex: keyword, $options: 'i' } },
+            ];
         }
+
+        // Thêm lọc
+        if (subject) filters.subject = { $in: subject.split(',') };
+        if (grade) filters.grade = { $in: grade.split(',') };
+        if (teachingMode) filters.teachingMode = { $in: teachingMode.split(',') };
+        if (sexTutor) filters.sexTutor = { $in: sexTutor.split(',') };
+
+        const total = await Course.countDocuments(filters);
+        const courses = await Course.find(filters)
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
+
+        
+        res.json( {
+            courses: multipleMongooseToObject(courses),
+            total,
+            currentPage: parseInt(page),
+            totalPages: Math.ceil(total / limit),
+            keyword,
+            subject,
+            grade,
+            teachingMode,
+            sexTutor,
+        });
+    } catch (error) {
+        console.error(error);
+        next(error);
     }
-    
+}
+
     async showDetail(req, res, next) {
         try {
             const slug = req.params.slug; // Lấy slug từ URL
@@ -88,37 +112,7 @@ class CourseController {
     }
     
 
-    // [GET] /search
-    async SearchCourse(req, res, next) {
-        try {
-            const keyword = req.query.keyword || '';
-            const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 10;
-            const skip = (page - 1) * limit;
     
-            const courses = await Course.find({
-                title: { $regex: keyword, $options: 'i' }
-            })
-            .skip(skip)
-            .limit(limit);
-    
-            const totalCourses = await Course.countDocuments({
-                title: { $regex: keyword, $options: 'i' }
-            });
-    
-            res.json({
-                data: multipleMongooseToObject(courses),
-                pagination: {
-                    total: totalCourses,
-                    page,
-                    limit,
-                    totalPages: Math.ceil(totalCourses / limit),
-                },
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
   
     async registerCourse(req, res, next) {
         try {
@@ -145,60 +139,117 @@ class CourseController {
         }
     }
     
-    // [GET] /filter
-    async getFilteredCourses(req, res, next) {
-        try {
-            const {
-                subject: courseSubject,
-                grade: courseGrade,
-                address: courseAddress,
-                teachingMode: courseTeachingMode,
-                sexTutor: courseSexTutor,
-                page = 1,
-                limit = 10,
-                keyword,
-            } = req.query;
+    // [GET] /search
+async SearchCourse(req, res, next) {
+    try {
+        const {
+            keyword = '',
+            page = 1,
+            limit = 10,
+            subject,
+            grade,
+            address,
+            teachingMode,
+            sexTutor,
+        } = req.query;
 
-            const skip = (parseInt(page) - 1) * parseInt(limit);
-            const filters = {};
+        // Chuyển đổi trang và limit sang số
+        const pageNumber = parseInt(page);
+        const limitNumber = parseInt(limit);
+        const skip = (pageNumber - 1) * limitNumber;
 
-            if (keyword) {
-                filters.name = { $regex: keyword, $options: 'i' };
-            }
-            if (courseSubject) {
-                filters.subject = { $in: courseSubject.split(',') };
-            }
-            if (courseGrade) {
-                filters.grade = { $in: courseGrade.split(',') };
-            }
-            if (courseAddress) {
-                filters.address = { $in: courseAddress.split(',') };
-            }
-            if (courseTeachingMode) {
-                filters.teachingMode = { $in: courseTeachingMode.split(',') };
-            }
-            if (courseSexTutor) {
-                filters.sexTutor = { $in: courseSexTutor.split(',') };
-            }
+        // Tạo bộ lọc
+        const filters = {};
 
-            const total = await Course.countDocuments(filters);
-            const courses = await Course.find(filters)
-                .skip(skip)
-                .limit(parseInt(limit));
-
-            res.json({
-                courses: multipleMongooseToObject(courses),
-                pagination: {
-                    total,
-                    currentPage: parseInt(page),
-                    totalPages: Math.ceil(total / limit),
-                },
-            });
-        } catch (error) {
-            console.error('Error filtering courses:', error);
-            res.status(500).json({ message: 'Error filtering courses', error });
+        if (keyword) {
+            filters.$or = [
+                { title: { $regex: keyword, $options: 'i' } },
+                { description: { $regex: keyword, $options: 'i' } },
+            ];
         }
+        if (subject) filters.subject = { $in: subject.split(',') };
+        if (grade) filters.grade = { $in: grade.split(',') };
+        if (address) filters.address = { $in: address.split(',') };
+        if (teachingMode) filters.teachingMode = { $in: teachingMode.split(',') };
+        if (sexTutor) filters.sexTutor = { $in: sexTutor.split(',') };
+
+        // Lấy dữ liệu và tổng số khóa học
+        const [courses, totalCourses] = await Promise.all([
+            Course.find(filters).skip(skip).limit(limitNumber),
+            Course.countDocuments(filters),
+        ]);
+
+        res.json({
+            data: multipleMongooseToObject(courses),
+            pagination: {
+                total: totalCourses,
+                page: pageNumber,
+                limit: limitNumber,
+                totalPages: Math.ceil(totalCourses / limitNumber),
+            },
+        });
+    } catch (error) {
+        console.error('Error searching courses:', error);
+        res.status(500).json({ message: 'Error searching courses', error });
+        next(error);
     }
+}
+
+   // [GET] /filter
+   async getFilteredCourses(req, res, next) {
+    try {
+        const {
+            keyword ,
+            subject,
+            grade,
+            address,
+            teachingMode,
+            sexTutor,
+            page = 1,
+            limit = 10,
+        } = req.query;
+        //console.log(keyword);
+        const pageNumber = parseInt(page);
+        const limitNumber = parseInt(limit);
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const filters = {};
+
+        // Tìm kiếm từ khóa (nhiều trường)
+        if (keyword) {
+            filters.$or = [
+                { subject: { $regex: keyword, $options: 'i' } },
+                { sexTutor: { $regex: keyword, $options: 'i' } },
+            ];
+        }
+        if (subject) filters.subject = { $in: subject.split(',') };
+        if (grade) filters.grade = { $in: grade.split(',') };
+        if (address) filters.address = { $in: address.split(',') };
+        if (teachingMode) filters.teachingMode = { $in: teachingMode.split(',') };
+        if (sexTutor) filters.sexTutor = { $in: sexTutor.split(',') };
+
+        // Lấy dữ liệu và tổng số khóa học
+        const [courses, total] = await Promise.all([
+            Course.find( {...filters,
+                status: 'Đã duyệt',}).skip(skip).limit(limitNumber),
+            Course.countDocuments(filters),
+        ]);
+
+        res.json({
+            courses: multipleMongooseToObject(courses),
+            pagination: {
+                total,
+                currentPage: pageNumber,
+                totalPages: Math.ceil(total / limitNumber),
+            },
+        });
+    } catch (error) {
+        console.error('Error filtering courses:', error);
+        res.status(500).json({ message: 'Error filtering courses', error });
+        next(error);
+    }
+}
+
 
  // [PUT] /update
 async updateCourses(req, res, next) {
