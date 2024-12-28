@@ -20,6 +20,8 @@ const TutorSchema = new Schema(
     rating: { type: Number, min: 0, max: 5 },
     slug: { type: String, unique: true },
     sex:{ type: String, unique: true }, 
+    avatar:{ type: String, unique: true }, 
+    cardPhoto:{ type: String, unique: true }, 
     status: {
       type: String,
       default: 'Chưa duyệt'

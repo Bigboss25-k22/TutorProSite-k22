@@ -75,7 +75,7 @@ class AuthController {
     // [POST] /register
     async register(req, res, next) {
         try {
-            const { name, email, password, phoneNumber, address, role, introduction, specialization, sex } = req.body;
+            const { name, email, password, phoneNumber, address, role, introduction, specialization, sex,avatar,cardPhoto } = req.body;
     
             // Check if the email already exists
             const existingUser = await User.findOne({ email });
@@ -120,6 +120,8 @@ class AuthController {
                     specialization: specialization || '',
                     rating: 0,
                     sex,
+                    avatar,
+                    cardPhoto, 
                 });
                 await tutor.save();
             }
