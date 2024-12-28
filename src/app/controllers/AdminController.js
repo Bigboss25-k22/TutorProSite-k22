@@ -199,7 +199,8 @@ class AdminController {
     async ShowregisterCourse(req, res, next) {
         try {
             // Find all registrations and populate userId with Tutor model
-            const registrations = await Registration.find({}).populate('userId', 'name email'); // Assuming 'name' and 'email' are fields in Tutor model
+            const registrations = await Registration.find({})
+                .populate('userId', 'name email'); // Assuming 'name' and 'email' are fields in Tutor model
 
             // Group registrations by courseId
             const courses = {};
@@ -212,6 +213,7 @@ class AdminController {
                     };
                 }
                 courses[courseId].tutors.push({
+                    registrationId: registration._id, // Added registrationId
                     tutor: registration.userId,
                     registeredAt: registration.registeredAt
                 });
@@ -220,10 +222,11 @@ class AdminController {
             // Convert courses object to array
             const coursesArray = Object.values(courses);
 
-            // Return the grouped data
+            // Return the grouped data with registrationId
             res.json(coursesArray.map(course => ({
                 courseId: course.courseId,
                 tutors: course.tutors.map(tutor => ({
+                    registrationId: tutor.registrationId, // Included registrationId in response
                     tutor: mongooseToObject(tutor.tutor),
                     registeredAt: tutor.registeredAt
                 }))
@@ -241,7 +244,7 @@ class AdminController {
             // Approve the selected registration
             const approvedRegistration = await Registration.findByIdAndUpdate(
                 registrationId,
-                { status: 'Chờ thanh toán' },
+                { status: 'Đã thanh toán' },
                 { new: true }
             );
         
@@ -261,21 +264,21 @@ class AdminController {
                 { status: 'Từ chối' }
             );
         
-            // Send approval email
-            const user = await User.findById(approvedRegistration.userId);
-            const course = await Course.findById(approvedRegistration.courseId);
-            const courseDetails = {
-                subject: course.subject,
-                grade: course.grade,
-                salary: course.salary,
-                sessions: course.sessions,
-                schedule: course.schedule,
-                teachingMode: course.teachingMode,
-                requirements: course.requirements,
-                sexTutor: course.sexTutor,
-                fee: course.fee
-            };
-            await sendApprovalEmail(user.email, courseDetails);
+            // // Send approval email
+            // const user = await User.findById(approvedRegistration.userId);
+            // const course = await Course.findById(approvedRegistration.courseId);
+            // const courseDetails = {
+            //     subject: course.subject,
+            //     grade: course.grade,
+            //     salary: course.salary,
+            //     sessions: course.sessions,
+            //     schedule: course.schedule,
+            //     teachingMode: course.teachingMode,
+            //     requirements: course.requirements,
+            //     sexTutor: course.sexTutor,
+            //     fee: course.fee
+            // };
+            // await sendApprovalEmail(user.email, courseDetails);
         
             res.status(200).json({ message: 'Registration approved successfully', registration: mongooseToObject(approvedRegistration) });
         } catch (error) {
