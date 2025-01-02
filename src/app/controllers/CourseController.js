@@ -83,7 +83,7 @@ async show(req, res, next) {
         try {
             const {
                  subject, grade, address, salary, sessions, schedule, 
-                studentInfo, requirements, teachingMode, contact, sexTutor,fee
+                studentInfo, requirements, teachingMode, contact, sexTutor
             } = req.body;
     
             const newCourse = new Course({
@@ -100,7 +100,7 @@ async show(req, res, next) {
                 teachingMode,
                 contact,
                 sexTutor,
-                fee
+               fee:salary*0.4,
             });
     
             await newCourse.save();
