@@ -44,8 +44,8 @@ CourseSchema.pre("save", async function (next) {
     let slug = baseSlug;
     let counter = 1;
 
-    // Kiểm tra trùng lặp slug
-    while (await mongoose.models.Tutor.exists({ slug })) {
+    // Kiểm tra trùng lặp slug trong model hiện tại
+    while (await this.constructor.exists({ slug })) {
       slug = `${baseSlug}-${counter}`;
       counter++;
     }
@@ -54,4 +54,5 @@ CourseSchema.pre("save", async function (next) {
   }
   next();
 });
+
 module.exports = mongoose.model('Course', CourseSchema);
