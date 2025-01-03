@@ -230,6 +230,63 @@ class AuthController {
         }
     }
 
+    // [POST] /profile/edit
+    async editProfile(req, res, next) {
+        try {
+            const userId = req.user.id;
+
+            // Fetch user to get role
+            const user = await User.findById(userId).select('role');
+            if (!user) {
+                return res.status(404).json({ message: 'User not found.' });
+            }
+
+            const userRole = user.role;
+            const updateData = req.body;
+
+            // Validate and sanitize updateData as needed
+
+            if (userRole === 'tutor') {
+                const updatedTutor = await Tutor.findByIdAndUpdate(userId, updateData, { new: true }).select('name sex address phoneNumber dob');
+                if (!updatedTutor) {
+                    return res.status(404).json({ message: 'Tutor profile not found.' });
+                }
+
+                const updatedProfile = {
+                    "Họ và Tên": updatedTutor.name,
+                    "Vai trò": userRole,
+                    "Ngày sinh": updatedTutor.dob,
+                    "Số điện thoại": updatedTutor.phoneNumber,
+                    "Email": user.email,
+                    "Địa chỉ": updatedTutor.address
+                };
+
+                res.status(200).json(updatedProfile);
+            } else if (userRole === 'parent') {
+                const updatedParent = await Parent.findByIdAndUpdate(userId, updateData, { new: true }).select('name address phoneNumber dob');
+                if (!updatedParent) {
+                    return res.status(404).json({ message: 'Parent profile not found.' });
+                }
+
+                const updatedProfile = {
+                    "Họ và Tên": updatedParent.name,
+                    "Vai trò": userRole,
+                    "Ngày sinh": updatedParent.dob,
+                    "Số điện thoại": updatedParent.phoneNumber,
+                    "Email": user.email,
+                    "Địa chỉ": updatedParent.address
+                };
+
+                res.status(200).json(updatedProfile);
+            } else {
+                return res.status(400).json({ message: 'Role không hợp lệ.' });
+            }
+        } catch (error) {
+            console.error('Error editing profile:', error);
+            res.status(500).json({ message: 'Lỗi máy chủ nội bộ.' });
+        }
+    }
+
 
     // [POST] /forgot-password
     async forgotPassword(req, res, next) {

@@ -1,0 +1,291 @@
+// Import Google Fonts
+@import url("https://fonts.googleapis.com/css?family=Fira+Sans:400,500,600,700,800");
+
+// Variables
+$primary-color: #007bff;
+$secondary-color: #6c757d;
+$background-color: #f8f9fa;
+$input-border-color: #ced4da;
+$input-focus-color: darken($primary-color, 10%);
+$border-radius: 4px;
+$padding: 10px;
+$font-size-base: 16px;
+$body-bg: #fff;
+$preview-card-shadow: 0px 3px 10px rgba(34, 35, 58, 0.2);
+$preview-card-border-radius: 25px;
+$preview-card-image-bg: linear-gradient(147deg, #000 0%, #000 74%);
+$preview-card-image-bg-after: linear-gradient(147deg, #000 0%, #000 74%);
+$preview-card-image-shadow: 0px 3px 10px 1px rgba(252, 56, 56, 0.2);
+$preview-card-code: #7b7992;
+$preview-card-title: #0d0925;
+$preview-card-desc: #4e4a67;
+$preview-card-button-text: #fff;
+$preview-card-button-text-hover: #989898;
+$preview-card-button-bg: linear-gradient(147deg, #000 0%, #000 74%);
+$preview-card-button-shadow: 0px 3px 10px rgba(252, 56, 56, 0.4);
+
+// Global styles
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: $body-bg;
+  min-height: 100vh;
+  font-family: "Fira Sans", sans-serif;
+}
+
+// Form styles
+.mt-4 {
+    margin-top: 1.5rem;
+
+    h3 {
+        color: $primary-color;
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
+    }
+
+    form {
+        background-color: $background-color;
+        padding: 2rem;
+        border-radius: $border-radius;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+        .form-group {
+            margin-bottom: 1.25rem;
+
+            label {
+                font-size: $font-size-base;
+                color: $secondary-color;
+            }
+
+            input,
+            select {
+                font-size: $font-size-base;
+                padding: $padding;
+                border: 1px solid $input-border-color;
+                border-radius: $border-radius;
+                width: 100%;
+
+                &:focus {
+                    border-color: $input-focus-color;
+                    outline: none;
+                    box-shadow: 0 0 4px rgba($input-focus-color, 0.3);
+                }
+            }
+        }
+
+        #studentFields, #tutorFields {
+            background-color: lighten($background-color, 10%);
+            padding: 1.5rem;
+            border-radius: $border-radius;
+            margin-top: 1rem;
+            border: 1px solid $input-border-color;
+        }
+
+        .btn-primary {
+            background-color: $primary-color;
+            border: none;
+            padding: $padding;
+            border-radius: $border-radius;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+
+            &:hover {
+                background-color: darken($primary-color, 10%);
+            }
+
+            &:focus {
+                outline: none;
+                box-shadow: 0 0 4px rgba($primary-color, 0.5);
+            }
+        }
+    }
+}
+
+// Preview card styles
+.preview-card {
+  position: relative;
+  margin: 15px;
+  background: #fff;
+  box-shadow: $preview-card-shadow;
+  padding: 30px 25px 30px;
+  border-radius: $preview-card-border-radius;
+  transition: all 0.3s;
+
+  @media screen and (max-width: 992px) {
+    height: auto;
+  }
+
+  @media screen and (max-width: 768px) {
+    min-height: 500px;
+    margin: 120px auto;
+  }
+
+  @media screen and (max-height: 500px) and (min-width: 992px) {
+    height: auto;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+
+    @media screen and (max-width: 768px) {
+      flex-direction: column;
+    }
+
+    &.swiper-slide-active {
+      .blog-slider__img {
+        img {
+          opacity: 1;
+          transition-delay: 0.3s;
+        }
+      }
+      .blog-slider__content {
+        > * {
+          opacity: 1;
+          transform: none;
+
+          @for $i from 0 to 15 {
+            &:nth-child(#{$i + 1}) {
+              transition-delay: $i * 0.1 + 0.3s;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  &__img {
+    width: 300px;
+    flex-shrink: 0;
+    height: 300px;
+    background-image: $preview-card-image-bg;
+    box-shadow: $preview-card-image-shadow;
+    border-radius: 20px;
+    transform: translateX(-80px);
+    overflow: hidden;
+
+    &:after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: $preview-card-image-bg-after;
+      border-radius: 20px;
+      opacity: 0.4;
+    }
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      opacity: 1;
+      border-radius: 20px;
+      transition: all 0.3s;
+    }
+
+    @media screen and (max-width: 768px) {
+      transform: translateY(-50%);
+      width: 90%;
+    }
+  }
+
+  &__content {
+    padding-right: 25px;
+    @media screen and (max-width: 768px) {
+      margin-top: -80px;
+      text-align: center;
+      padding: 0 30px;
+    }
+
+    > * {
+      transform: translateY(25px);
+      transition: all 0.4s;
+    }
+  }
+
+  &__code {
+    color: $preview-card-code;
+    margin-bottom: 15px;
+    font-weight: 500;
+  }
+
+  &__title {
+    font-size: 24px;
+    font-weight: 700;
+    color: $preview-card-title;
+    margin-bottom: 20px;
+  }
+
+  &__text {
+    color: $preview-card-desc;
+    margin-bottom: 30px;
+    line-height: 1.5em;
+  }
+
+  &__button {
+    display: inline-flex;
+    background-image: $preview-card-button-bg;
+    padding: 15px 35px;
+    margin-bottom: 30px;
+    border-radius: 50px;
+    color: $preview-card-button-text;
+    box-shadow: $preview-card-button-shadow;
+    text-decoration: none;
+    font-weight: 500;
+    justify-content: center;
+    letter-spacing: 1px;
+
+    &:hover {
+      color: $preview-card-button-text-hover;
+    }
+
+    @media screen and (max-width: 576px) {
+      width: 100%;
+    }
+  }
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #f0f2f5;
+  font-family: Arial, sans-serif;
+}
+.card {
+  width: 300px;
+  padding: 20px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: white;
+  text-align: center;
+}
+.btn {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+}
+.btn-register {
+  background-color: #28a745;
+  color: white;
+}
+.btn-login {
+  background-color: #007bff;
+  color: white;
+}
+.btn:hover {
+  opacity: 0.9;
+}
