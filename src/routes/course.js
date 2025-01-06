@@ -8,6 +8,7 @@ const { authenticateToken, authorizeRoles } = require('../app/middleware/authmid
 
 // Register course
 router.post('/register-Course', authenticateToken, authorizeRoles('tutor'), courseController.registerCourse);
+router.get('/registrations', authenticateToken, authorizeRoles('tutor'), courseController.getMyPendingRegistrations);
 
 //Detail course
 

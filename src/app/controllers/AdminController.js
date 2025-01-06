@@ -244,7 +244,7 @@ class AdminController {
             // Approve the selected registration
             const approvedRegistration = await Registration.findByIdAndUpdate(
                 registrationId,
-                { status: 'Đã thanh toán' },
+                { status: 'Chờ thanh toán' },
                 { new: true }
             );
         
