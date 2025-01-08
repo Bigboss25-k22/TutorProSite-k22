@@ -150,6 +150,12 @@ class CourseController {
             // Get course ID from the request body
             const { courseId } = req.body;
 
+            const tutor = await user.findById(tutorId);
+
+            if (!tutor.status === 'Chưa duyệt') {
+                return res.status(400).json({ message: 'Tài khoản của bạn chưa được duyệt, không thể đăng ký khóa học' });
+            }
+
             // Create a new registration entry
             const newRegistration = new Registration({
                 userId: tutorId,
