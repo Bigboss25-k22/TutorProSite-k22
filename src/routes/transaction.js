@@ -13,8 +13,6 @@ router.get('/', authenticateToken,authorizeRoles('tutor'), transactionController
 // Xử lý thanh toán
 router.post('/processPayment', authenticateToken,authorizeRoles('tutor'), transactionController.processPayment);
 
-
-
 // Lấy tất cả giao dịch (chỉ dành cho admin)
 router.get('/all', authenticateToken, authorizeRoles('admin'), transactionController.getAllTransactions);
 

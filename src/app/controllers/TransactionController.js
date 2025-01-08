@@ -2,7 +2,7 @@ const Transaction = require('../models/Transaction');
 const Tutor = require('../models/Tutor');
 const Course = require('../models/Course');
 const dotenv = require('dotenv');
-const {  checkPaid } = require('../../util/payment');
+const {checkPaid } = require('../../util/payment');
 
 dotenv.config(); // Load environment variables
 
@@ -10,9 +10,6 @@ require('dotenv').config(); // Load environment variables from .env
 
 class TransactionController {
     
-    
-    
-
     // Lấy danh sách giao dịch của gia sư
     async getTransactionsByTutor(req, res, next) {
         try {
@@ -35,8 +32,6 @@ class TransactionController {
             res.status(500).json({ message: 'Error retrieving transactions', error });
         }
     }
-
-    
 
 
     // Tạo giao dịch thanh toán
@@ -164,10 +159,7 @@ class TransactionController {
     }
     
     
-    
-    
-   
-    
+
 
 
     // Lấy tất cả giao dịch (chỉ dành cho admin)
