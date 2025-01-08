@@ -303,10 +303,14 @@ class AuthController {
             // Tạo mã xác thực (ví dụ: 6 chữ số ngẫu nhiên)
             const resetToken = crypto.randomInt(100000, 999999).toString();
 
+            // Đặt thời gian hết hạn (ví dụ: 5 phút)
+            const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+
             // Lưu mã xác thực vào cơ sở dữ liệu
             await ResetToken.create({
                 userId: user._id,
                 token: resetToken,
+                expiresAt: expiresAt
             });
 
             // Gửi email chứa mã xác thực
@@ -323,52 +327,6 @@ class AuthController {
         }
     }
 
-    /**
-     * [POST] /reset-password
-     * Đặt lại mật khẩu dựa trên mã xác thực
-     * Body: { email, resetToken, newPassword }
-     */
-    async verifyResetToken(req, res, next) {
-        try {
-            const { email, resetToken } = req.body;
-    
-            // Tìm người dùng dựa trên email
-            const user = await User.findOne({ email });
-    
-            if (!user) {
-                return res.status(404).json({ 
-                    message: 'Không tìm thấy người dùng với email này.'
-                });
-            }
-    
-            // Tìm mã xác thực hợp lệ
-            const tokenDoc = await ResetToken.findOne({ 
-                userId: user._id, 
-                token: resetToken 
-            });
-    
-            if (!tokenDoc) {
-                return res.status(400).json({ 
-                    message: 'Mã xác thực không hợp lệ hoặc đã hết hạn.'
-                });
-            }
-    
-            res.status(200).json({ 
-                message: 'Mã xác thực hợp lệ.'
-            });
-        } catch (error) {
-            console.error('Lỗi khi kiểm tra mã xác thực:', error);
-            res.status(500).json({ 
-                message: 'Đã xảy ra lỗi khi kiểm tra mã xác thực.'
-            });
-        }
-    }
-    
-    /**
-     * [POST] /verify-reset-token
-     * Kiểm tra mã xác thực
-     * Body: { email, resetToken }
-     */
     async verifyResetToken(req, res, next) {
         try {
             const { email, resetToken } = req.body;
@@ -394,6 +352,13 @@ class AuthController {
                 });
             }
 
+            // Kiểm tra thời gian hết hạn
+            if (tokenDoc.expiresAt < new Date()) {
+                return res.status(400).json({ 
+                    message: 'Mã xác thực đã hết hạn.'
+                });
+            }
+
             res.status(200).json({ 
                 message: 'Mã xác thực hợp lệ.'
             });
@@ -404,12 +369,7 @@ class AuthController {
             });
         }
     }
-
-    /**
-     * [POST] /reset-password
-     * Đặt lại mật khẩu dựa trên mã xác thực
-     * Body: { email, newPassword }
-     */
+    
     async resetPassword(req, res, next) {
         try {
             const { email, newPassword } = req.body;
@@ -441,9 +401,6 @@ class AuthController {
             });
         }
     }
-
-
-
 }
 
 module.exports = new AuthController();
