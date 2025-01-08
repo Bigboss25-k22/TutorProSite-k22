@@ -19,7 +19,7 @@ class CourseController {
                 sexTutor,
             } = req.query;
 
-            const filters = { status: 'Đã duyệt' };
+            const filters = { status: 'Đã duyệt', tutor_id: null};
 
             // Thêm tìm kiếm theo từ khóa
             if (keyword) {
@@ -163,7 +163,7 @@ class CourseController {
             res.status(200).json({ message: 'Đăng ký khóa học thành công' });
         } catch (error) {
             console.error(error);
-            next(error); // Handle error
+            next(error); 
         }
     }
     
@@ -283,9 +283,9 @@ class CourseController {
     // [PUT] /update
     async updateCourses(req, res, next) {
         try {
-            const { slug } = req.params; // Lấy slug từ URL
-            const updateData = req.body; // Dữ liệu cập nhật từ body
-            const parentId = req.user.id; // Lấy parent_id từ người dùng hiện tại
+            const { slug } = req.params; 
+            const updateData = req.body; 
+            const parentId = req.user.id; 
 
             // Tìm khóa học theo slug
             const course = await Course.findOne({ slug });
@@ -351,8 +351,6 @@ class CourseController {
             res.status(500).json({ message: 'Lỗi khi xóa khóa học', error });
         }
     }
-
-    
 }
 
 module.exports = new CourseController();
