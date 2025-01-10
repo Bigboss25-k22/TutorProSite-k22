@@ -4,7 +4,7 @@ const router = express.Router();
 const courseController = require('../app/controllers/CourseController'); 
 const { authenticateToken, authorizeRoles } = require('../app/middleware/authmiddleware');
 
-
+router.get('/my-courses', authenticateToken, courseController.getMyCourses);
 
 // Register course
 router.post('/register-Course', authenticateToken, authorizeRoles('tutor'), courseController.registerCourse);

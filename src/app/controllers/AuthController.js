@@ -300,10 +300,14 @@ class AuthController {
                 return res.status(404).json({ message: 'Email không tồn tại trong hệ thống.' });
             }
 
-            // Tạo mã xác thực (ví dụ: 6 chữ số ngẫu nhiên)
+            const reset = ResetToken.findOne({ userId: user._id });
+
+            if (reset) {
+                ResetToken.deleteOne({ userId: user._id });
+            }
+
             const resetToken = crypto.randomInt(100000, 999999).toString();
 
-            // Đặt thời gian hết hạn (ví dụ: 5 phút)
             const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
 
             // Lưu mã xác thực vào cơ sở dữ liệu

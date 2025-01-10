@@ -140,6 +140,37 @@ class CourseController {
             res.status(500).json({ message: 'Internal server error.' });
         }
     }
+
+    async getMyCourses(req, res, next) {
+        try {
+            const userId = req.user.id; 
+            const role = req.user.role;
+
+            console.log('role:', role);
+            console.log('userId:', userId);
+
+            if (role === 'tutor') {
+                // Find all courses created by the tutor
+                const courses = await Course.find({ tutor_id: userId });
+
+                if (!courses.length) {
+                    return res.status(200).json({ message: 'No courses found.' });
+                }
+
+                res.status(200).json({ courses: multipleMongooseToObject(courses) });
+            } else {
+                const courses = await Course.find({ parent_id: userId });
+                if (!courses.length) {
+                    return res.status(200).json({ message: 'No courses found.' });
+                }
+
+                res.status(200).json({ courses: multipleMongooseToObject(courses) });
+            }
+        } catch (error) {
+            console.error('Error fetching courses:', error);
+            res.status(500).json({ message: 'Internal server error.' });
+        }
+    }
     
     // [POST] /register-Course
     async registerCourse(req, res, next) {
@@ -278,12 +309,12 @@ class CourseController {
                 totalPages: Math.ceil(total / limitNumber),
             },
         });
-    } catch (error) {
-        console.error('Error filtering courses:', error);
-        res.status(500).json({ message: 'Error filtering courses', error });
-        next(error);
+        } catch (error) {
+            console.error('Error filtering courses:', error);
+            res.status(500).json({ message: 'Error filtering courses', error });
+            next(error);
+        }
     }
-}
 
 
     // [PUT] /update
