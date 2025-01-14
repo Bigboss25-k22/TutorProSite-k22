@@ -7,14 +7,14 @@ const Registration = require('../models/Registration');
 const { mongooseToObject } = require('../../util/mongoose');
 
 
-const { sendApprovalEmail } = require('../services/emailService');
+const { sendApprovalEmail , sendCourseApprovalEmail} = require('../services/emailService');
 
 class AdminController {
 
     // [GET] /parents
     async showParent(req, res, next) {
         try {
-            const parents = await Parent.find({});
+            const parents = await Parent.find({}).sort({ createdAt: -1 });  
             res.json({ parents: parents.map(parent => mongooseToObject(parent)) });
         } catch (error) {
             next(error);
@@ -64,7 +64,7 @@ class AdminController {
     // [GET] /tutor
     async showTutor(req, res, next) {
         try {
-            const tutors = await Tutor.find({});
+            const tutors = await Tutor.find({}).sort({ createdAt: -1 });
             res.json({ tutors: tutors.map(tutor => mongooseToObject(tutor)) });
         } catch (error) {
             next(error);
@@ -118,7 +118,7 @@ class AdminController {
     // [GET] /courses
     async showCourse(req, res, next) {
         try {
-            const courses = await Course.find({});
+            const courses = await Course.find({}).sort({ createdAt: -1 });
             res.json({ courses: courses.map(course => mongooseToObject(course)) });
         } catch (error) {
             next(error);
@@ -186,6 +186,26 @@ class AdminController {
                 { status: 'Đã duyệt' },
                 { new: true }
             );
+
+            const courseDetails = {
+                subject: course.subject,
+                grade: course.grade,
+                salary: course.salary,
+                sessions: course.sessions,
+                schedule: course.schedule,
+                teachingMode: course.teachingMode,
+                requirements: course.requirements,
+                sexTutor: course.sexTutor,
+                fee: course.fee
+            };
+
+            console.log(course.parent_id);
+
+
+            const parent = await User.findById(course.parent_id);
+            console.log(parent.email);
+            await sendCourseApprovalEmail(parent.email, courseDetails);
+
             if (!course) {
                 return res.status(404).json({ message: 'Khóa học không tồn tại' });
             }
@@ -200,7 +220,8 @@ class AdminController {
         try {
             // Find all registrations and populate userId with Tutor model
             const registrations = await Registration.find({})
-                .populate('userId', 'name email'); // Assuming 'name' and 'email' are fields in Tutor model
+                .populate('userId', 'name email') // Assuming 'name' and 'email' are fields in Tutor model
+                .sort({ registeredAt: -1 });
 
             // Group registrations by courseId
             const courses = {};
@@ -213,7 +234,7 @@ class AdminController {
                     };
                 }
                 courses[courseId].tutors.push({
-                    registrationId: registration._id, // Added registrationId
+                    registrationId: registration._id, 
                     tutor: registration.userId,
                     registeredAt: registration.registeredAt
                 });
@@ -226,7 +247,7 @@ class AdminController {
             res.json(coursesArray.map(course => ({
                 courseId: course.courseId,
                 tutors: course.tutors.map(tutor => ({
-                    registrationId: tutor.registrationId, // Included registrationId in response
+                    registrationId: tutor.registrationId, 
                     tutor: mongooseToObject(tutor.tutor),
                     registeredAt: tutor.registeredAt
                 }))
@@ -264,21 +285,21 @@ class AdminController {
                 { status: 'Từ chối' }
             );
         
-            // // Send approval email
-            // const user = await User.findById(approvedRegistration.userId);
-            // const course = await Course.findById(approvedRegistration.courseId);
-            // const courseDetails = {
-            //     subject: course.subject,
-            //     grade: course.grade,
-            //     salary: course.salary,
-            //     sessions: course.sessions,
-            //     schedule: course.schedule,
-            //     teachingMode: course.teachingMode,
-            //     requirements: course.requirements,
-            //     sexTutor: course.sexTutor,
-            //     fee: course.fee
-            // };
-            // await sendApprovalEmail(user.email, courseDetails);
+            // Send approval email
+            const user = await User.findById(approvedRegistration.userId);
+            const course = await Course.findById(approvedRegistration.courseId);
+            const courseDetails = {
+                subject: course.subject,
+                grade: course.grade,
+                salary: course.salary,
+                sessions: course.sessions,
+                schedule: course.schedule,
+                teachingMode: course.teachingMode,
+                requirements: course.requirements,
+                sexTutor: course.sexTutor,
+                fee: course.fee
+            };
+            await sendApprovalEmail(user.email, courseDetails);
         
             res.status(200).json({ message: 'Registration approved successfully', registration: mongooseToObject(approvedRegistration) });
         } catch (error) {
