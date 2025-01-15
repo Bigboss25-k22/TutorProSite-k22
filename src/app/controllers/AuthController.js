@@ -57,6 +57,7 @@ class AuthController {
                     message: "Đăng nhập thành công!",
                     token,
                     name,
+                    _id:user._id,
                 });
             } else {
                 res.status(401).json({ error: 'Invalid email or password' }); 

@@ -10,7 +10,7 @@ class MessageController {
             const { content } = req.body;
             const senderId= req.user.id;
            
-            const  receiverId=111;
+            const  receiverId=109;
             // Tạo tin nhắn mới, chỉ cho phép gửi đến Admin
             const newMessage = new Message({
                 senderId,
@@ -131,6 +131,33 @@ class MessageController {
             res.status(500).json({ message: 'Error retrieving chat history', error });
         }
     }
+
+// Lấy danh sách tin nhắn giữa 2 người dùng
+async getMessagesUser(userId) {
+    try {
+        // Tìm tin nhắn có liên quan đến userId (người gửi hoặc người nhận)
+        const messages = await Message.find({
+            $or: [
+                { senderId: userId }, // Tin nhắn do user gửi
+                { receiverId: userId } // Tin nhắn user nhận
+            ]
+        }).sort({ timestamp: 1 }); // Sắp xếp theo thời gian
+
+        // Kiểm tra nếu không có tin nhắn
+        if (!messages || messages.length === 0) {
+            throw new Error('No messages found for the user');
+        }
+
+        // Trả về danh sách tin nhắn
+        return messages;
+    } catch (error) {
+        console.error('Error retrieving messages:', error);
+        throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+    }
+}
+
+
+
 
 }
 
