@@ -11,7 +11,7 @@ const slugify = require("slugify");
 const CourseSchema = new Schema({
   _id: { type: Number },           // ID khóa học
   parent_id: { type: Number, required: true },                       // ID phụ huynh
-  tutor_id: { type: Number},                        // ID gia sư
+  tutor_id: { type: Number, default: null},                        // ID gia sư
   subject: { type: String, required: true },                         // Môn học
   grade: { type: String, required: true },                           // Lớp dạy
   address: { type: String, required: true },                         // Địa chỉ

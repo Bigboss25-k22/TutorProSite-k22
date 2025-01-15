@@ -216,6 +216,7 @@ class AdminController {
     }
 
     // [GET] /course/register
+
     async ShowregisterCourse(req, res, next) {
         try {
             // Find all registrations and populate userId with Tutor model
@@ -230,7 +231,8 @@ class AdminController {
                 if (!courses[courseId]) {
                     courses[courseId] = {
                         courseId: courseId,
-                        tutors: []
+                        tutors: [],
+                        status: registration.status // Include status in the grouped data
                     };
                 }
                 courses[courseId].tutors.push({
@@ -243,9 +245,10 @@ class AdminController {
             // Convert courses object to array
             const coursesArray = Object.values(courses);
 
-            // Return the grouped data with registrationId
+            // Return the grouped data with registrationId and status
             res.json(coursesArray.map(course => ({
                 courseId: course.courseId,
+                status: course.status, // Include status in the response
                 tutors: course.tutors.map(tutor => ({
                     registrationId: tutor.registrationId, 
                     tutor: mongooseToObject(tutor.tutor),
@@ -273,11 +276,11 @@ class AdminController {
                 return res.status(404).json({ message: 'Registration not found' });
             }
         
-            // Update the course with the approved tutor
-            await Course.findByIdAndUpdate(
-                approvedRegistration.courseId,
-                { tutor_id: approvedRegistration.userId }
-            );
+            // // Update the course with the approved tutor
+            // await Course.findByIdAndUpdate(
+            //     approvedRegistration.courseId,
+            //     { tutor_id: approvedRegistration.userId }
+            // );
         
             // Reject other registrations for the same course
             await Registration.updateMany(

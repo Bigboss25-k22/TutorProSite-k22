@@ -131,75 +131,84 @@ class TransactionController {
     
     // Thanh toán và cập nhật trạng thái giao dịch và lớp học
     async processPayment(req, res, next) {
-       
         try {
-           
-            const { transactionId } = req.body;
-            const tutorId = req.user.id; // ID của gia sư từ token
-    
-            // Tìm giao dịch
-            const transaction = await Transaction.findById(transactionId);
-            if (!transaction) {
-                return res.status(404).json({ message: 'Transaction not found' });
+          const { transactionId } = req.body;
+          const tutorId = req.user.id; // ID của gia sư từ token
+      
+          // Tìm giao dịch
+          const transaction = await Transaction.findById(transactionId);
+          if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found' });
+          }
+      
+          // Kiểm tra nếu trạng thái hiện tại của giao dịch là 'pending'
+          if (transaction.status !== 'pending') {
+            return res.status(400).json({ message: 'Transaction is not pending' });
+          }
+      
+          // Kiểm tra thanh toán trong 5 phút
+          const checkInterval = 10 * 1000; // 10 giây
+          const timeout = 5 * 60 * 1000; // 5 phút
+          let elapsed = 0;
+      
+          const checkPaymentStatus = async () => {
+            if (elapsed >= timeout) {
+              // Quá thời gian, cập nhật trạng thái giao dịch thành 'failed'
+              transaction.status = 'failed';
+              await transaction.save();
+              console.log('Transaction failed due to timeout:', transactionId);
+              return;
             }
-          
-            // Kiểm tra nếu trạng thái hiện tại của giao dịch là 'pending'
-            if (transaction.status !== 'pending') {
-                return res.status(400).json({ message: 'Transaction is not pending' });
+      
+            // Kiểm tra trạng thái thanh toán từ API
+            const isPaid = await checkPaid(transaction.amount, transaction.description);
+            console.log(transaction);
+            if (isPaid.success) {
+              // Thanh toán thành công
+              transaction.status = 'completed';
+              await transaction.save();
+      
+              // Cập nhật trạng thái của khóa học
+              const course = await Course.findById(transaction.courseId);
+              if (course) {
+                course.tutor_id = tutorId;
+                await course.save();
+              }
+      
+              // **Cập nhật trạng thái của Registration**
+              const registration = await Registration.findOne({
+                courseId: transaction.courseId,
+                userId: tutorId,
+              });
+      
+              if (registration) {
+                registration.status = 'Đã Thanh Toán'; // Cập nhật trạng thái
+                await registration.save();
+                console.log('Registration updated successfully:', registration._id);
+              } else {
+                console.warn('No registration found for the given course and tutor');
+              }
+      
+              console.log('Transaction completed:', transactionId);
+              return res.json({
+                message: 'Transaction completed successfully',
+                transaction,
+              });
             }
-    
-          
-    
-            // Kiểm tra thanh toán trong 5 phút
-            const checkInterval = 10 * 1000; // 10 giây
-            const timeout = 5 * 60 * 1000; // 5 phút
-            let elapsed = 0;
-    
-            const checkPaymentStatus = async () => {
-                if (elapsed >= timeout) {
-                    // Quá thời gian, cập nhật trạng thái giao dịch thành 'failed'
-                    transaction.status = 'failed';
-                   // transaction.failureReason = 'Payment timeout';
-                    await transaction.save();
-                    console.log('Transaction failed due to timeout:', transactionId);
-                    return;
-                }
-    
-                // Kiểm tra trạng thái thanh toán từ API
-                const isPaid = await checkPaid(transaction.amount, transaction.description);
-                console.log(transaction);
-                if (isPaid.success) {
-                    // Thanh toán thành công
-                    transaction.status = 'completed';
-                    await transaction.save();
-                    
-                   
-                    //Cập nhật trạng thái của khóa học
-                    const course = await Course.findById(transaction.courseId);
-                    if (course) {
-                        course.tutor_id = tutorId;
-                        await course.save();
-                    }
-    
-                    console.log('Transaction completed:', transactionId);
-                    return res.json({ message: 'Transaction completed successfully', transaction });
-                }
-    
-                elapsed += checkInterval;
-                setTimeout(checkPaymentStatus, checkInterval);
-            };
-    
-            checkPaymentStatus();
+      
+            elapsed += checkInterval;
+            setTimeout(checkPaymentStatus, checkInterval);
+          };
+      
+          checkPaymentStatus();
         } catch (error) {
-            console.error('Error processing payment:', error);
-            res.status(500).json({ message: 'Error processing payment', error });
+          console.error('Error processing payment:', error);
+          res.status(500).json({ message: 'Error processing payment', error });
         }
-    }
+      }
+      
     
     
-
-
-
     // Lấy tất cả giao dịch (chỉ dành cho admin)
     async getAllTransactions(req, res, next) {
         try {
