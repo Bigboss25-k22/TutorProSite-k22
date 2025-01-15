@@ -33,10 +33,48 @@ class TransactionController {
         }
     }
 
+    async getTransactionById(req, res, next) {
+        try {
+          const { transactionId } = req.params;
+          const tutorId = req.user.id;
+      
+          // Tìm giao dịch
+          const transaction = await Transaction.findOne({ _id: transactionId, tutorId });
+          if (!transaction) {
+            return res.status(404).json({ message: 'Transaction not found' });
+          }
+      
+          // Tạo URL mã QR dựa trên thông tin giao dịch
+          const bankInfo = {
+            id: process.env.BANK_ID,
+            accountNo: process.env.ACCOUNT_NO,
+            accountName: process.env.ACCOUNT_NAME,
+            template: process.env.TEMPLATE,
+          };
+      
+          const qrCodeData = `https://img.vietqr.io/image/${bankInfo.id}-${bankInfo.accountNo}-${bankInfo.template}.png?amount=${transaction.amount}&addInfo=${encodeURIComponent(transaction.description)}&accountName=${bankInfo.accountName}`;
+      
+          res.status(200).json({
+            message: 'Transaction retrieved successfully',
+            transaction,
+            qrCode: qrCodeData, // Trả về mã QR
+          });
+        } catch (error) {
+          console.error('Error retrieving transaction:', error);
+          res.status(500).json({ message: 'Error retrieving transaction', error });
+        }
+      }
+      
+      
 
     // Tạo giao dịch thanh toán
     async createTransaction(req, res, next) {
         try {
+
+            console.log('Request Body:', req.body);
+            console.log('Request Params:', req.params);
+            console.log('Authenticated User:', req.user);
+
             const bankInfo = {
                 id: process.env.BANK_ID,
                 accountNo: process.env.ACCOUNT_NO,

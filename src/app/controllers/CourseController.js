@@ -120,7 +120,7 @@ class CourseController {
             const registrations = await Registration.find({
                 userId: tutorId,
                 status: 'Chờ thanh toán'
-            }).populate('courseId', 'subject grade address salary sessions schedule teachingMode sexTutor requirements');
+            }).populate('courseId', 'subject grade address salary sessions schedule teachingMode sexTutor requirements slug');
 
             if (!registrations.length) {
                 return res.status(200).json({ message: 'No pending registrations found.' });

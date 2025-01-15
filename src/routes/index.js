@@ -17,7 +17,7 @@ function route(app) {
   app.use('/tutors', tutorRouter);
   app.use('/courses', courseRouter);
   app.use('/parents', parentRouter);
-  app.use('/transactions', authenticateToken, authorizeRoles('tutortutor'), transactionRouter);
+  app.use('/transactions', authenticateToken, authorizeRoles('tutor'), transactionRouter);
   app.use('/reviews', reviewRouter);
   app.use('/messages', messageRouter);
 
