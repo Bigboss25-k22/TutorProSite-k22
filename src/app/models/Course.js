@@ -44,8 +44,10 @@ CourseSchema.pre("save", async function (next) {
     let slug = baseSlug;
     let counter = 1;
 
+
     // Kiểm tra trùng lặp slug trong mô hình Course
     while (await mongoose.models.Course.exists({ slug, _id: { $ne: this._id } })) {
+
       slug = `${baseSlug}-${counter}`;
       counter++;
     }
