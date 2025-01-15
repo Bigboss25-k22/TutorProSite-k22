@@ -3,6 +3,7 @@ const Tutor = require('../models/Tutor');
 const Course = require('../models/Course');
 const dotenv = require('dotenv');
 const {checkPaid } = require('../../util/payment');
+const Registration = require('../models/Registration');
 
 dotenv.config(); // Load environment variables
 
