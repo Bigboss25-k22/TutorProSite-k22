@@ -11,7 +11,7 @@ const slugify = require("slugify");
 const CourseSchema = new Schema({
   _id: { type: Number },           // ID khóa học
   parent_id: { type: Number, required: true },                       // ID phụ huynh
-  tutor_id: { type: Number},                        // ID gia sư
+  tutor_id: { type: Number, default: null},                        // ID gia sư
   subject: { type: String, required: true },                         // Môn học
   grade: { type: String, required: true },                           // Lớp dạy
   address: { type: String, required: true },                         // Địa chỉ
@@ -44,8 +44,10 @@ CourseSchema.pre("save", async function (next) {
     let slug = baseSlug;
     let counter = 1;
 
-    // Kiểm tra trùng lặp slug trong model hiện tại
-    while (await this.constructor.exists({ slug })) {
+
+    // Kiểm tra trùng lặp slug trong mô hình Course
+    while (await mongoose.models.Course.exists({ slug, _id: { $ne: this._id } })) {
+
       slug = `${baseSlug}-${counter}`;
       counter++;
     }

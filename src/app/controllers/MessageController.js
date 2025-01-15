@@ -34,7 +34,7 @@ class MessageController {
     async replyToMessage(req, res, next) {
         try {
             const { content, receiverId } = req.body; // Admin nhập nội dung và chọn người nhận
-            const senderId = req.user.id; // Admin là người gửi (lấy từ token)
+            const senderId = req.user.id; 
     
             // Tạo tin nhắn mới
             const newMessage = new Message({

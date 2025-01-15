@@ -1,12 +1,13 @@
 const Parent = require('../models/Parent'); 
 const Review = require('../models/Review');
 const Tutor = require('../models/Tutor');
+const Course = require('../models/Course');
 
 class ReviewController {
     // Hiển thị form đánh giá
     async showReviewForm(req, res, next) {
         try {
-            const slug = req.params.slug; // Lấy slug từ URL
+            const slug = req.params.slug; 
             const tutor = await Tutor.findOne({ slug });
 
             if (!tutor) {
@@ -70,6 +71,11 @@ class ReviewController {
 
             if (!tutor) {
                 return res.status(404).json({ message: "Tutor not found" });
+            }
+
+            const courses = await Course.find({ tutor_id: tutor._id, parent_id: parentId });
+            if (courses.length === 0) {
+                return res.status(400).json({ message: "You have not registered any courses with this tutor." });
             }
 
             // Kiểm tra nếu phụ huynh đã đánh giá gia sư này

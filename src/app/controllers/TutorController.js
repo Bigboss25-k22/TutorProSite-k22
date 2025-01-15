@@ -87,9 +87,6 @@ class TutorController {
             res.status(500).json({ message: 'Error fetching tutor details', error });
         }
     }
-    
-
-   
 
     async SearchTutors(req, res, next) {
         try {
@@ -127,7 +124,6 @@ class TutorController {
             next(error);
         }
     }
-    
 
     // [GET] /filter
     async getFilteredTutors(req, res, next) {
@@ -191,8 +187,7 @@ class TutorController {
             console.error('Error filtering tutors:', error);
             res.status(500).json({ message: 'Error filtering tutors', error });
         }
-    }
-    
+    } 
     
 }
 

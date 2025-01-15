@@ -7,58 +7,58 @@ class CourseController {
    
     
     // [GET] /courses
-async show(req, res, next) {
-    try {
-        const {
-            page = 1,
-            limit = 10,
-            keyword,
-            subject,
-            grade,
-            teachingMode,
-            sexTutor,
-        } = req.query;
+    async show(req, res, next) {
+        try {
+            const {
+                page = 1,
+                limit = 10,
+                keyword,
+                subject,
+                grade,
+                teachingMode,
+                sexTutor,
+            } = req.query;
 
-        const filters = { status: 'Đã duyệt' };
+            const filters = { status: 'Đã duyệt', tutor_id: null};
 
-        // Thêm tìm kiếm theo từ khóa
-        if (keyword) {
-            filters.$or = [
-                { subject: { $regex: keyword, $options: 'i' } },
-                { grade: { $regex: keyword, $options: 'i' } },
-                { teachingMode: { $regex: keyword, $options: 'i' } },
-                { sexTutor: { $regex: keyword, $options: 'i' } },
-            ];
+            // Thêm tìm kiếm theo từ khóa
+            if (keyword) {
+                filters.$or = [
+                    { subject: { $regex: keyword, $options: 'i' } },
+                    { grade: { $regex: keyword, $options: 'i' } },
+                    { teachingMode: { $regex: keyword, $options: 'i' } },
+                    { sexTutor: { $regex: keyword, $options: 'i' } },
+                ];
+            }
+
+            // Thêm lọc
+            if (subject) filters.subject = { $in: subject.split(',') };
+            if (grade) filters.grade = { $in: grade.split(',') };
+            if (teachingMode) filters.teachingMode = { $in: teachingMode.split(',') };
+            if (sexTutor) filters.sexTutor = { $in: sexTutor.split(',') };
+
+            const total = await Course.countDocuments(filters);
+            const courses = await Course.find(filters)
+                .skip((page - 1) * limit)
+                .limit(parseInt(limit));
+
+            
+            res.json( {
+                courses: multipleMongooseToObject(courses),
+                total,
+                currentPage: parseInt(page),
+                totalPages: Math.ceil(total / limit),
+                keyword,
+                subject,
+                grade,
+                teachingMode,
+                sexTutor,
+            });
+        } catch (error) {
+            console.error(error);
+            next(error);
         }
-
-        // Thêm lọc
-        if (subject) filters.subject = { $in: subject.split(',') };
-        if (grade) filters.grade = { $in: grade.split(',') };
-        if (teachingMode) filters.teachingMode = { $in: teachingMode.split(',') };
-        if (sexTutor) filters.sexTutor = { $in: sexTutor.split(',') };
-
-        const total = await Course.countDocuments(filters);
-        const courses = await Course.find(filters)
-            .skip((page - 1) * limit)
-            .limit(parseInt(limit));
-
-        
-        res.json( {
-            courses: multipleMongooseToObject(courses),
-            total,
-            currentPage: parseInt(page),
-            totalPages: Math.ceil(total / limit),
-            keyword,
-            subject,
-            grade,
-            teachingMode,
-            sexTutor,
-        });
-    } catch (error) {
-        console.error(error);
-        next(error);
     }
-}
 
     async showDetail(req, res, next) {
         try {
@@ -111,9 +111,68 @@ async show(req, res, next) {
         }
     }
     
+    // [GET] /courses/registrations
+    async getMyPendingRegistrations(req, res, next) {
+        try {
+            const tutorId = req.user.id; // Assuming req.user is populated by authenticateToken middleware
 
+            // Find all registrations for the tutor with status "Chờ thanh toán"
+            const registrations = await Registration.find({
+                userId: tutorId,
+                status: 'Chờ thanh toán'
+            }).populate('courseId', 'subject grade address salary sessions schedule teachingMode sexTutor requirements slug');
+
+            if (!registrations.length) {
+                return res.status(200).json({ message: 'No pending registrations found.' });
+            }
+
+            // Prepare the response data
+            const pendingRegistrations = registrations.map(reg => ({
+                registrationId: reg._id,
+                course: mongooseToObject(reg.courseId),
+                registeredAt: reg.registeredAt,
+                status: reg.status
+            }));
+
+            res.status(200).json({ pendingRegistrations });
+        } catch (error) {
+            console.error('Error fetching pending registrations:', error);
+            res.status(500).json({ message: 'Internal server error.' });
+        }
+    }
+
+    async getMyCourses(req, res, next) {
+        try {
+            const userId = req.user.id; 
+            const role = req.user.role;
+
+            console.log('role:', role);
+            console.log('userId:', userId);
+
+            if (role === 'tutor') {
+                // Find all courses created by the tutor
+                const courses = await Course.find({ tutor_id: userId });
+
+                if (!courses.length) {
+                    return res.status(200).json({ message: 'No courses found.' });
+                }
+
+                res.status(200).json({ courses: multipleMongooseToObject(courses) });
+            } else {
+                const courses = await Course.find({ parent_id: userId });
+                if (!courses.length) {
+                    return res.status(200).json({ message: 'No courses found.' });
+                }
+
+                res.status(200).json({ courses: multipleMongooseToObject(courses) });
+            }
+        } catch (error) {
+            console.error('Error fetching courses:', error);
+            res.status(500).json({ message: 'Internal server error.' });
+        }
+    }
     
-  
+    // [POST] /register-Course
     async registerCourse(req, res, next) {
         try {
             // Get tutor ID from session or JWT (assuming req.user contains the logged-in tutor's info)
@@ -121,6 +180,12 @@ async show(req, res, next) {
 
             // Get course ID from the request body
             const { courseId } = req.body;
+
+            const tutor = await user.findById(tutorId);
+
+            if (!tutor.status === 'Chưa duyệt') {
+                return res.status(400).json({ message: 'Tài khoản của bạn chưa được duyệt, không thể đăng ký khóa học' });
+            }
 
             // Create a new registration entry
             const newRegistration = new Registration({
@@ -135,65 +200,66 @@ async show(req, res, next) {
             res.status(200).json({ message: 'Đăng ký khóa học thành công' });
         } catch (error) {
             console.error(error);
-            next(error); // Handle error
+            next(error); 
         }
     }
     
+
     // [GET] /search
-async SearchCourse(req, res, next) {
-    try {
-        const {
-            keyword = '',
-            page = 1,
-            limit = 10,
-            subject,
-            grade,
-            address,
-            teachingMode,
-            sexTutor,
-        } = req.query;
+    async SearchCourse(req, res, next) {
+        try {
+            const {
+                keyword = '',
+                page = 1,
+                limit = 10,
+                subject,
+                grade,
+                address,
+                teachingMode,
+                sexTutor,
+            } = req.query;
 
-        // Chuyển đổi trang và limit sang số
-        const pageNumber = parseInt(page);
-        const limitNumber = parseInt(limit);
-        const skip = (pageNumber - 1) * limitNumber;
+            // Chuyển đổi trang và limit sang số
+            const pageNumber = parseInt(page);
+            const limitNumber = parseInt(limit);
+            const skip = (pageNumber - 1) * limitNumber;
 
-        // Tạo bộ lọc
-        const filters = {};
+            // Tạo bộ lọc
+            const filters = {};
 
-        if (keyword) {
-            filters.$or = [
-                { title: { $regex: keyword, $options: 'i' } },
-                { description: { $regex: keyword, $options: 'i' } },
-            ];
+            if (keyword) {
+                filters.$or = [
+                    { title: { $regex: keyword, $options: 'i' } },
+                    { description: { $regex: keyword, $options: 'i' } },
+                ];
+            }
+            if (subject) filters.subject = { $in: subject.split(',') };
+            if (grade) filters.grade = { $in: grade.split(',') };
+            if (address) filters.address = { $in: address.split(',') };
+            if (teachingMode) filters.teachingMode = { $in: teachingMode.split(',') };
+            if (sexTutor) filters.sexTutor = { $in: sexTutor.split(',') };
+
+            // Lấy dữ liệu và tổng số khóa học
+            const [courses, totalCourses] = await Promise.all([
+                Course.find(filters).skip(skip).limit(limitNumber),
+                Course.countDocuments(filters),
+            ]);
+
+            res.json({
+                data: multipleMongooseToObject(courses),
+                pagination: {
+                    total: totalCourses,
+                    page: pageNumber,
+                    limit: limitNumber,
+                    totalPages: Math.ceil(totalCourses / limitNumber),
+                },
+            });
+        } catch (error) {
+            console.error('Error searching courses:', error);
+            res.status(500).json({ message: 'Error searching courses', error });
+            next(error);
         }
-        if (subject) filters.subject = { $in: subject.split(',') };
-        if (grade) filters.grade = { $in: grade.split(',') };
-        if (address) filters.address = { $in: address.split(',') };
-        if (teachingMode) filters.teachingMode = { $in: teachingMode.split(',') };
-        if (sexTutor) filters.sexTutor = { $in: sexTutor.split(',') };
-
-        // Lấy dữ liệu và tổng số khóa học
-        const [courses, totalCourses] = await Promise.all([
-            Course.find(filters).skip(skip).limit(limitNumber),
-            Course.countDocuments(filters),
-        ]);
-
-        res.json({
-            data: multipleMongooseToObject(courses),
-            pagination: {
-                total: totalCourses,
-                page: pageNumber,
-                limit: limitNumber,
-                totalPages: Math.ceil(totalCourses / limitNumber),
-            },
-        });
-    } catch (error) {
-        console.error('Error searching courses:', error);
-        res.status(500).json({ message: 'Error searching courses', error });
-        next(error);
     }
-}
 
    // [GET] /filter
    async getFilteredCourses(req, res, next) {
@@ -243,87 +309,85 @@ async SearchCourse(req, res, next) {
                 totalPages: Math.ceil(total / limitNumber),
             },
         });
-    } catch (error) {
-        console.error('Error filtering courses:', error);
-        res.status(500).json({ message: 'Error filtering courses', error });
-        next(error);
+        } catch (error) {
+            console.error('Error filtering courses:', error);
+            res.status(500).json({ message: 'Error filtering courses', error });
+            next(error);
+        }
     }
-}
 
 
- // [PUT] /update
-async updateCourses(req, res, next) {
-    try {
-        const { slug } = req.params; // Lấy slug từ URL
-        const updateData = req.body; // Dữ liệu cập nhật từ body
-        const parentId = req.user.id; // Lấy parent_id từ người dùng hiện tại
+    // [PUT] /update
+    async updateCourses(req, res, next) {
+        try {
+            const { slug } = req.params; 
+            const updateData = req.body; 
+            const parentId = req.user.id; 
 
-        // Tìm khóa học theo slug
-        const course = await Course.findOne({ slug });
-        if (!course) {
-            return res.status(404).json({ message: 'Khóa học không tồn tại' });
+            // Tìm khóa học theo slug
+            const course = await Course.findOne({ slug });
+            if (!course) {
+                return res.status(404).json({ message: 'Khóa học không tồn tại' });
+            }
+
+            // Kiểm tra trạng thái
+            if (course.status !== 'Chưa duyệt') {
+                return res.status(400).json({ message: 'Khóa học đã được duyệt, không thể cập nhật' });
+            }
+
+            // Kiểm tra quyền sở hữu
+            if (course.parent_id !== parentId) {
+                return res.status(403).json({ message: 'Bạn không có quyền cập nhật khóa học này' });
+            }
+
+            // Cập nhật khóa học
+            Object.assign(course, updateData);
+            await course.save();
+
+            res.status(200).json({
+                message: 'Cập nhật khóa học thành công',
+                course: mongooseToObject(course),
+            });
+        } catch (error) {
+            console.error('Error updating course:', error);
+            res.status(500).json({ message: 'Lỗi khi cập nhật khóa học', error });
         }
-
-        // Kiểm tra trạng thái
-        if (course.status !== 'Chưa duyệt') {
-            return res.status(400).json({ message: 'Khóa học đã được duyệt, không thể cập nhật' });
-        }
-
-        // Kiểm tra quyền sở hữu
-        if (course.parent_id !== parentId) {
-            return res.status(403).json({ message: 'Bạn không có quyền cập nhật khóa học này' });
-        }
-
-        // Cập nhật khóa học
-        Object.assign(course, updateData);
-        await course.save();
-
-        res.status(200).json({
-            message: 'Cập nhật khóa học thành công',
-            course: mongooseToObject(course),
-        });
-    } catch (error) {
-        console.error('Error updating course:', error);
-        res.status(500).json({ message: 'Lỗi khi cập nhật khóa học', error });
     }
-}
 
     
-// [DELETE] /delete
-async deleteCourses(req, res, next) {
-    try {
-        const { slug } = req.params; // Lấy slug từ URL
-        const parentId = req.user.id; // Lấy parent_id từ người dùng hiện tại
+    // [DELETE] /delete
+    async deleteCourses(req, res, next) {
+        try {
+            const { slug } = req.params; // Lấy slug từ URL
+            const parentId = req.user.id; // Lấy parent_id từ người dùng hiện tại
 
-        // Tìm khóa học theo slug
-        const course = await Course.findOne({ slug });
-        if (!course) {
-            return res.status(404).json({ message: 'Khóa học không tồn tại' });
+            // Tìm khóa học theo slug
+            const course = await Course.findOne({ slug });
+            if (!course) {
+                return res.status(404).json({ message: 'Khóa học không tồn tại' });
+            }
+
+            // Kiểm tra trạng thái
+            if (course.status !== 'Chưa duyệt') {
+                return res.status(400).json({ message: 'Khóa học đã được duyệt, không thể xóa' });
+            }
+
+            // Kiểm tra quyền sở hữu
+            if (course.parent_id !== parentId) {
+                return res.status(403).json({ message: 'Bạn không có quyền xóa khóa học này' });
+            }
+
+            // Xóa khóa học
+            await Course.deleteOne({ slug });
+
+            res.status(200).json({
+                message: 'Xóa khóa học thành công',
+            });
+        } catch (error) {
+            console.error('Error deleting course:', error);
+            res.status(500).json({ message: 'Lỗi khi xóa khóa học', error });
         }
-
-        // Kiểm tra trạng thái
-        if (course.status !== 'Chưa duyệt') {
-            return res.status(400).json({ message: 'Khóa học đã được duyệt, không thể xóa' });
-        }
-
-        // Kiểm tra quyền sở hữu
-        if (course.parent_id !== parentId) {
-            return res.status(403).json({ message: 'Bạn không có quyền xóa khóa học này' });
-        }
-
-        // Xóa khóa học
-        await Course.deleteOne({ slug });
-
-        res.status(200).json({
-            message: 'Xóa khóa học thành công',
-        });
-    } catch (error) {
-        console.error('Error deleting course:', error);
-        res.status(500).json({ message: 'Lỗi khi xóa khóa học', error });
     }
-}
-
-    
 }
 
 module.exports = new CourseController();
