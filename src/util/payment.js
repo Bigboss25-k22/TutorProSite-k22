@@ -37,6 +37,6 @@ async function checkPaid(price, description) {
 }
 
 module.exports = {
-   
+
     checkPaid,
 };

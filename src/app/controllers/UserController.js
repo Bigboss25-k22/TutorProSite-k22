@@ -6,7 +6,7 @@ class UserController {
     async showStudents(req, res, next) {
 
         try {
-            const users = await User.find({role: 'student'});
+            const users = await User.find({ role: 'student' });
             res.render('User/users', {
                 title: 'List student of users',
                 users: multipleMongooseToObject(users)
@@ -15,31 +15,31 @@ class UserController {
             next(error);
         }
     }
-    
+
 
     // [GET] /users/tuto
     async showTutos(req, res, next) {
         try {
-            const users = await User.find({ role: 'tuto' }); 
+            const users = await User.find({ role: 'tuto' });
             res.render('User/users', {
                 title: 'List tuto of users',
                 users: multipleMongooseToObject(users)
             });
         } catch (error) {
-            next(error); 
+            next(error);
         }
     }
 
     // [GET] /users
     async show(req, res, next) {
         try {
-            const users = await User.find(); 
+            const users = await User.find();
             res.render('User/users', {
                 title: 'List student of users',
                 users: multipleMongooseToObject(users)
             });
         } catch (error) {
-            next(error); 
+            next(error);
         }
     }
 

@@ -1,4 +1,4 @@
-const Parent = require('../models/Parent'); 
+const Parent = require('../models/Parent');
 const Review = require('../models/Review');
 const Tutor = require('../models/Tutor');
 const Course = require('../models/Course');
@@ -7,7 +7,7 @@ class ReviewController {
     // Hiển thị form đánh giá
     async showReviewForm(req, res, next) {
         try {
-            const slug = req.params.slug; 
+            const slug = req.params.slug;
             const tutor = await Tutor.findOne({ slug });
 
             if (!tutor) {
@@ -25,17 +25,17 @@ class ReviewController {
     async getReviews(req, res, next) {
         try {
             const slug = req.params.slug;
-    
+
             // Tìm gia sư dựa vào slug
             const tutor = await Tutor.findOne({ slug });
-    
+
             if (!tutor) {
                 return res.status(404).json({ message: "Tutor not found" });
             }
-    
+
             // Lấy danh sách đánh giá dựa trên tutorId
             const reviews = await Review.find({ tutorId: tutor._id }).populate("parentId", "name");
-    
+
             // Trả về danh sách đánh giá dưới dạng JSON
             res.status(200).json({
                 message: 'Reviews retrieved successfully',
@@ -52,7 +52,7 @@ class ReviewController {
             res.status(500).json({ message: 'Error retrieving reviews', error });
         }
     }
-    
+
 
     // Xử lý đánh giá
     async submitReview(req, res, next) {

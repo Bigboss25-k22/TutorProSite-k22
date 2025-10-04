@@ -1,4 +1,4 @@
-const Tutor = require('../models/Tutor'); 
+const Tutor = require('../models/Tutor');
 const { mongooseToObject } = require('../../util/mongoose');
 const { multipleMongooseToObject } = require('../../util/mongoose');
 
@@ -11,8 +11,8 @@ class TutorController {
 
             const total = await Tutor.countDocuments({ status: 'Đã duyệt' });
             const tutors = await Tutor.find({ status: 'Đã duyệt' })
-                                      .skip(skip)
-                                      .limit(limit);
+                .skip(skip)
+                .limit(limit);
 
             const totalPages = Math.ceil(total / limit);
 
@@ -65,18 +65,18 @@ class TutorController {
         }
     }
 
-    async showDetail(req, res,next) {
+    async showDetail(req, res, next) {
         try {
             // Lấy slug từ params
             const slug = req.params.slug;
-    
+
             // Tìm tutor theo slug
             const tutor = await Tutor.findOne({ slug });
-    
+
             if (!tutor) {
                 return res.status(404).json({ message: 'Tutor not found' });
             }
-    
+
             // Trả về thông tin gia sư
             res.status(200).json({
                 message: 'Tutor details retrieved successfully',
@@ -94,23 +94,23 @@ class TutorController {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 10;
             const skip = (page - 1) * limit;
-    
+
             const tutors = await Tutor.find({
                 $or: [
                     { name: { $regex: keyword, $options: 'i' } },
                     { specialization: { $regex: keyword, $options: 'i' } }
                 ]
             })
-            .skip(skip)
-            .limit(limit);
-    
+                .skip(skip)
+                .limit(limit);
+
             const totalTutors = await Tutor.countDocuments({
                 $or: [
                     { name: { $regex: keyword, $options: 'i' } },
                     { specialization: { $regex: keyword, $options: 'i' } }
                 ]
             });
-    
+
             res.json({
                 data: multipleMongooseToObject(tutors),
                 pagination: {
@@ -139,10 +139,10 @@ class TutorController {
                 limit = 10,
                 keyword,
             } = req.query;
-    
+
             const skip = (parseInt(page) - 1) * parseInt(limit);
             const filters = {};
-    
+
             if (keyword) {
                 filters.$or = [
                     { name: { $regex: keyword, $options: 'i' } },
@@ -166,7 +166,7 @@ class TutorController {
                 if (ratingMin) filters.rating.$gte = parseFloat(ratingMin);
                 if (ratingMax) filters.rating.$lte = parseFloat(ratingMax);
             }
-    
+
             const total = await Tutor.countDocuments(filters);
             const tutors = await Tutor.find({
                 ...filters,
@@ -174,7 +174,7 @@ class TutorController {
             })
                 .skip(skip)
                 .limit(parseInt(limit));
-    
+
             res.json({
                 tutors: multipleMongooseToObject(tutors),
                 pagination: {
@@ -187,8 +187,8 @@ class TutorController {
             console.error('Error filtering tutors:', error);
             res.status(500).json({ message: 'Error filtering tutors', error });
         }
-    } 
-    
+    }
+
 }
 
 module.exports = new TutorController();

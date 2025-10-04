@@ -7,14 +7,14 @@ const Registration = require('../models/Registration');
 const { mongooseToObject } = require('../../util/mongoose');
 
 
-const { sendApprovalEmail , sendCourseApprovalEmail} = require('../services/emailService');
+const { sendApprovalEmail, sendCourseApprovalEmail } = require('../services/emailService');
 
 class AdminController {
 
     // [GET] /parents
     async showParent(req, res, next) {
         try {
-            const parents = await Parent.find({}).sort({ createdAt: -1 });  
+            const parents = await Parent.find({}).sort({ createdAt: -1 });
             res.json({ parents: parents.map(parent => mongooseToObject(parent)) });
         } catch (error) {
             next(error);
@@ -76,9 +76,9 @@ class AdminController {
         try {
             const tutor = await Tutor.findById(req.params.id);
             const courses = await Course.find({ tutor_id: req.params.id });
-            res.json({ 
-                tutor: mongooseToObject(tutor), 
-                courses: courses.map(course => mongooseToObject(course)) 
+            res.json({
+                tutor: mongooseToObject(tutor),
+                courses: courses.map(course => mongooseToObject(course))
             });
         } catch (error) {
             next(error);
@@ -236,7 +236,7 @@ class AdminController {
                     };
                 }
                 courses[courseId].tutors.push({
-                    registrationId: registration._id, 
+                    registrationId: registration._id,
                     tutor: registration.userId,
                     registeredAt: registration.registeredAt
                 });
@@ -250,7 +250,7 @@ class AdminController {
                 courseId: course.courseId,
                 status: course.status, // Include status in the response
                 tutors: course.tutors.map(tutor => ({
-                    registrationId: tutor.registrationId, 
+                    registrationId: tutor.registrationId,
                     tutor: mongooseToObject(tutor.tutor),
                     registeredAt: tutor.registeredAt
                 }))
@@ -264,30 +264,30 @@ class AdminController {
     async approveRegister(req, res, next) {
         try {
             const { registrationId } = req.body;
-        
+
             // Approve the selected registration
             const approvedRegistration = await Registration.findByIdAndUpdate(
                 registrationId,
                 { status: 'Chờ thanh toán' },
                 { new: true }
             );
-        
+
             if (!approvedRegistration) {
                 return res.status(404).json({ message: 'Registration not found' });
             }
-        
+
             // // Update the course with the approved tutor
             // await Course.findByIdAndUpdate(
             //     approvedRegistration.courseId,
             //     { tutor_id: approvedRegistration.userId }
             // );
-        
+
             // Reject other registrations for the same course
             await Registration.updateMany(
                 { courseId: approvedRegistration.courseId, _id: { $ne: registrationId } },
                 { status: 'Từ chối' }
             );
-        
+
             // Send approval email
             const user = await User.findById(approvedRegistration.userId);
             const course = await Course.findById(approvedRegistration.courseId);
@@ -303,7 +303,7 @@ class AdminController {
                 fee: course.fee
             };
             await sendApprovalEmail(user.email, courseDetails);
-        
+
             res.status(200).json({ message: 'Registration approved successfully', registration: mongooseToObject(approvedRegistration) });
         } catch (error) {
             next(error);

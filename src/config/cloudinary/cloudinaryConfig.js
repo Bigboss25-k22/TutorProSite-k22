@@ -6,7 +6,7 @@ require('dotenv').config();
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY, 
+  api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
@@ -14,10 +14,9 @@ cloudinary.config({
 const storage = new CloudinaryStorage({
   cloudinary: cloudinary,
   params: {
-    folder: "product_images", // Thư mục lưu trữ trên Cloudinary
-    allowed_formats: ["jpg", "jpeg", "png", "gif"], // Định dạng file cho phép
+    folder: "product_images",
+    allowed_formats: ["jpg", "jpeg", "png", "gif"],
     public_id: (req, file) => {
-      // Tên file tải lên trên Cloudinary
       return `image${Date.now()}`;
     },
   },

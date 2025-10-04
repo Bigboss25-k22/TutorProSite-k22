@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const Tutor = require('../models/Tutor');  
+const Tutor = require('../models/Tutor');
 const Parent = require('../models/Parent');
-const User = require('../models/user'); 
+const User = require('../models/user');
 
 const key = require('../../config/auth.config');
 const ResetToken = require('../models/ResetToken');
@@ -23,12 +23,12 @@ class AuthController {
     // [POST] /login
     async login(req, res, next) {
         try {
-            const { email, password } = req.body; 
-            const user = await User.findOne({ email }); 
+            const { email, password } = req.body;
+            const user = await User.findOne({ email });
 
             console.log(user);
-            
-            if (user && await bcrypt.compare(password, user.password)) { 
+
+            if (user && await bcrypt.compare(password, user.password)) {
                 let name = '';
 
                 // Fetch the name based on the user's role
@@ -46,28 +46,28 @@ class AuthController {
 
                 // Generate a token
                 const token = jwt.sign(
-                    { id: user._id, role: user.role, name: name }, 
-                    key.secret, 
-                    { expiresIn: '1h' } 
+                    { id: user._id, role: user.role, name: name },
+                    key.secret,
+                    { expiresIn: '1h' }
                 );
-                
-                user.password = undefined; 
 
-                res.status(200).json({ 
+                user.password = undefined;
+
+                res.status(200).json({
                     message: "Đăng nhập thành công!",
                     token,
                     name,
-                    _id:user._id,
+                    _id: user._id,
                 });
             } else {
-                res.status(401).json({ error: 'Invalid email or password' }); 
+                res.status(401).json({ error: 'Invalid email or password' });
             }
         } catch (error) {
-            console.error('Error during login:', error); 
-            next(error); 
+            console.error('Error during login:', error);
+            next(error);
         }
     }
-    
+
     // [GET] /register
     registerForm(req, res, next) {
         res.render('auth/register');
@@ -76,18 +76,16 @@ class AuthController {
     // [POST] /register
     async register(req, res, next) {
         try {
-            const { name, email, password, phoneNumber, address, role, introduction, specialization, sex,avatar,cardPhoto } = req.body;
-    
-            // Check if the email already exists
+            const { name, email, password, phoneNumber, address, role, introduction, specialization, sex, avatar, cardPhoto } = req.body;
+
             const existingUser = await User.findOne({ email });
             if (existingUser) {
-                return res.status(400).json({ message: 'Email đã được sử dụng.' }); // "Email is already in use."
+                return res.status(400).json({ message: 'Email đã được sử dụng.' });
             }
-    
+
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
-    
-            // Create User and save to User collection
+
             const user = new User({
                 name,
                 password: hashedPassword,
@@ -96,10 +94,9 @@ class AuthController {
                 address,
                 phoneNumber,
             });
-    
+
             await user.save();
-    
-            // If role is 'parent', save to Parent collection
+
             if (role === 'parent') {
                 const parent = new Parent({
                     _id: user._id,
@@ -109,8 +106,7 @@ class AuthController {
                 });
                 await parent.save();
             }
-    
-            // If role is 'tutor', save to Tutor collection
+
             if (role === 'tutor') {
                 const tutor = new Tutor({
                     _id: user._id,
@@ -122,15 +118,15 @@ class AuthController {
                     rating: 0,
                     sex,
                     avatar,
-                    cardPhoto, 
+                    cardPhoto,
                 });
                 await tutor.save();
             }
-    
-            res.status(201).json({ message: 'Đăng ký thành công.' }); // "Registration successful."
+
+            res.status(201).json({ message: 'Đăng ký thành công.' });
         } catch (error) {
             console.error('Register error:', error);
-            res.status(500).json({ message: 'Lỗi máy chủ nội bộ.' }); // "Internal server error."
+            res.status(500).json({ message: 'Lỗi máy chủ nội bộ.' });
         }
     }
 
@@ -141,33 +137,29 @@ class AuthController {
     }
 
     // Hàm đổi mật khẩu
-    async  updatePassword(req, res, next) {
+    async updatePassword(req, res, next) {
         try {
-            const userId = req.user.id; // Lấy ID người dùng từ token
+            const userId = req.user.id;
             console.log(userId);
             const { oldPassword, newPassword } = req.body;
-            
-            // Tìm người dùng trong cơ sở dữ liệu
+
             const user = await User.findById(userId);
-            
+
             if (!user) {
                 return res.status(404).send({ message: 'User not found.' });
             }
-            
-            // So sánh mật khẩu cũ với mật khẩu trong cơ sở dữ liệu
+
             const isMatch = await bcrypt.compare(oldPassword, user.password);
-            
+
             if (!isMatch) {
                 return res.status(400).send({ message: 'Old password is incorrect.' });
             }
-            
-            // Hash mật khẩu mới
+
             const hashedPassword = await bcrypt.hash(newPassword, 10);
-            
-            // Cập nhật mật khẩu mới cho người dùng
+
             user.password = hashedPassword;
             await user.save();
-            
+
             return res.status(200).send({ message: 'Password updated successfully.' });
         } catch (err) {
             console.error(err);
@@ -180,7 +172,6 @@ class AuthController {
         try {
             const userId = req.user.id;
 
-            // Fetch user from User model to get email and role
             const user = await User.findById(userId).select('email role');
 
             if (!user) {
@@ -191,7 +182,6 @@ class AuthController {
 
             let userInfo = {};
 
-            // Fetch user details based on role
             if (userRole === 'tutor') {
                 const tutor = await Tutor.findById(userId).select('name sex address phoneNumber dob');
                 if (tutor) {
@@ -236,7 +226,6 @@ class AuthController {
         try {
             const userId = req.user.id;
 
-            // Fetch user to get role
             const user = await User.findById(userId).select('role');
             if (!user) {
                 return res.status(404).json({ message: 'User not found.' });
@@ -244,8 +233,6 @@ class AuthController {
 
             const userRole = user.role;
             const updateData = req.body;
-
-            // Validate and sanitize updateData as needed
 
             if (userRole === 'tutor') {
                 const updatedTutor = await Tutor.findByIdAndUpdate(userId, updateData, { new: true }).select('name sex address phoneNumber dob');
@@ -295,7 +282,7 @@ class AuthController {
             const { email } = req.body;
             const user = await User.findOne({ email });
 
-            console.log(user); 
+            console.log(user);
 
             if (!user) {
                 return res.status(404).json({ message: 'Email không tồn tại trong hệ thống.' });
@@ -309,24 +296,22 @@ class AuthController {
 
             const resetToken = crypto.randomInt(100000, 999999).toString();
 
-            const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes from now
+            const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
-            // Lưu mã xác thực vào cơ sở dữ liệu
             await ResetToken.create({
                 userId: user._id,
                 token: resetToken,
                 expiresAt: expiresAt
             });
 
-            // Gửi email chứa mã xác thực
             await sendResetCodeEmail(email, resetToken);
 
-            res.status(200).json({ 
+            res.status(200).json({
                 message: 'Mã xác thực đã được gửi đến email của bạn. Vui lòng kiểm tra.'
             });
         } catch (error) {
             console.error('Lỗi khi gửi yêu cầu đặt lại mật khẩu:', error);
-            res.status(500).json({ 
+            res.status(500).json({
                 message: 'Đã xảy ra lỗi khi xử lý yêu cầu.'
             });
         }
@@ -336,72 +321,66 @@ class AuthController {
         try {
             const { email, resetToken } = req.body;
 
-            // Tìm người dùng dựa trên email
             const user = await User.findOne({ email });
 
             if (!user) {
-                return res.status(404).json({ 
+                return res.status(404).json({
                     message: 'Không tìm thấy người dùng với email này.'
                 });
             }
 
-            // Tìm mã xác thực hợp lệ
-            const tokenDoc = await ResetToken.findOne({ 
-                userId: user._id, 
-                token: resetToken 
+            const tokenDoc = await ResetToken.findOne({
+                userId: user._id,
+                token: resetToken
             });
 
             if (!tokenDoc) {
-                return res.status(400).json({ 
+                return res.status(400).json({
                     message: 'Mã xác thực không hợp lệ hoặc đã hết hạn.'
                 });
             }
 
-            // Kiểm tra thời gian hết hạn
             if (tokenDoc.expiresAt < new Date()) {
-                return res.status(400).json({ 
+                return res.status(400).json({
                     message: 'Mã xác thực đã hết hạn.'
                 });
             }
 
-            res.status(200).json({ 
+            res.status(200).json({
                 message: 'Mã xác thực hợp lệ.'
             });
         } catch (error) {
             console.error('Lỗi khi kiểm tra mã xác thực:', error);
-            res.status(500).json({ 
+            res.status(500).json({
                 message: 'Đã xảy ra lỗi khi kiểm tra mã xác thực.'
             });
         }
     }
-    
+
     async resetPassword(req, res, next) {
         try {
             const { email, newPassword } = req.body;
 
-            // Tìm người dùng dựa trên email
             const user = await User.findOne({ email });
 
             if (!user) {
-                return res.status(404).json({ 
+                return res.status(404).json({
                     message: 'Không tìm thấy người dùng với email này.'
                 });
             }
 
-            // Hash mật khẩu mới
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(newPassword, salt);
             await user.save();
 
-            // Xóa token đã sử dụng
             await ResetToken.deleteMany({ userId: user._id });
 
-            res.status(200).json({ 
+            res.status(200).json({
                 message: 'Mật khẩu đã được đặt lại thành công. Bạn có thể đăng nhập với mật khẩu mới.'
             });
         } catch (error) {
             console.error('Lỗi khi đặt lại mật khẩu:', error);
-            res.status(500).json({ 
+            res.status(500).json({
                 message: 'Đã xảy ra lỗi khi đặt lại mật khẩu.'
             });
         }

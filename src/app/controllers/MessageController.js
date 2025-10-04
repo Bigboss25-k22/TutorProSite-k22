@@ -8,19 +8,19 @@ class MessageController {
     async sendMessage(req, res, next) {
         try {
             const { content } = req.body;
-            const senderId= req.user.id;
-           
-            const  receiverId=109;
+            const senderId = req.user.id;
+
+            const receiverId = 109;
             // Tạo tin nhắn mới, chỉ cho phép gửi đến Admin
             const newMessage = new Message({
                 senderId,
-                receiverId:receiverId,
-                chatRoomId : senderId + '-' + receiverId,
+                receiverId: receiverId,
+                chatRoomId: senderId + '-' + receiverId,
                 content,
             });
-    
+
             await newMessage.save();
-    
+
             res.status(201).json({
                 message: 'Message sent successfully to Admin',
                 data: mongooseToObject(newMessage),
@@ -34,23 +34,23 @@ class MessageController {
     async replyToMessage(req, res, next) {
         try {
             const { content, receiverId } = req.body; // Admin nhập nội dung và chọn người nhận
-            const senderId = req.user.id; 
-    
+            const senderId = req.user.id;
+
             // Tạo tin nhắn mới
             const newMessage = new Message({
                 senderId,
                 receiverId,
-                chatRoomId: receiverId + '-' + senderId , // Hoặc dựa vào ID đã tồn tại giữa 2 người
+                chatRoomId: receiverId + '-' + senderId, // Hoặc dựa vào ID đã tồn tại giữa 2 người
                 content,
             });
-    
+
             await newMessage.save();
-    
+
             res.status(201).json({
                 message: 'Reply sent successfully',
                 data: mongooseToObject(newMessage),
             });
-    
+
             // (Optional) Phát tin nhắn mới qua WebSocket cho người nhận
             const receiverSocket = io.sockets.sockets.get(receiverId); // Kiểm tra người nhận online
             if (receiverSocket) {
@@ -61,7 +61,7 @@ class MessageController {
             res.status(500).json({ message: 'Error sending reply', error });
         }
     }
-    
+
     // Lấy danh sách tin nhắn giữa 2 người dùng
     async getMessages(req, res, next) {
         try {
@@ -115,7 +115,7 @@ class MessageController {
         try {
             const { chatRoomId } = req.params;
             const messages = await Message.find({ chatRoomId }).sort({ timestamp: 1 });
-           
+
 
             if (!messages.length) {
                 return res.status(404).json({ message: 'No messages found' });
@@ -132,29 +132,29 @@ class MessageController {
         }
     }
 
-// Lấy danh sách tin nhắn giữa 2 người dùng
-async getMessagesUser(userId) {
-    try {
-        // Tìm tin nhắn có liên quan đến userId (người gửi hoặc người nhận)
-        const messages = await Message.find({
-            $or: [
-                { senderId: userId }, // Tin nhắn do user gửi
-                { receiverId: userId } // Tin nhắn user nhận
-            ]
-        }).sort({ timestamp: 1 }); // Sắp xếp theo thời gian
+    // Lấy danh sách tin nhắn giữa 2 người dùng
+    async getMessagesUser(userId) {
+        try {
+            // Tìm tin nhắn có liên quan đến userId (người gửi hoặc người nhận)
+            const messages = await Message.find({
+                $or: [
+                    { senderId: userId }, // Tin nhắn do user gửi
+                    { receiverId: userId } // Tin nhắn user nhận
+                ]
+            }).sort({ timestamp: 1 }); // Sắp xếp theo thời gian
 
-        // Kiểm tra nếu không có tin nhắn
-        if (!messages || messages.length === 0) {
-            throw new Error('No messages found for the user');
+            // Kiểm tra nếu không có tin nhắn
+            if (!messages || messages.length === 0) {
+                throw new Error('No messages found for the user');
+            }
+
+            // Trả về danh sách tin nhắn
+            return messages;
+        } catch (error) {
+            console.error('Error retrieving messages:', error);
+            throw error; // Ném lỗi để xử lý ở nơi gọi hàm
         }
-
-        // Trả về danh sách tin nhắn
-        return messages;
-    } catch (error) {
-        console.error('Error retrieving messages:', error);
-        throw error; // Ném lỗi để xử lý ở nơi gọi hàm
     }
-}
 
 
 
