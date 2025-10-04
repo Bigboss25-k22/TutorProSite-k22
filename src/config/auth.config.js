@@ -1,3 +1,3 @@
 module.exports = {
-    secret: "tutorify-secret"
+    secret: process.env.JWT_SECRET || "tutorify-secret"
 };
